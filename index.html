@@ -2,189 +2,201 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>نظام الأرشفة والاستيراد الجماعي المركزي</title>
+    <title>منظومة قاطع ميسان - محرك البحث والإضافة</title>
     <style>
-        :root { --gold: #d4af37; --bg: #050505; --green: #00ff41; }
-        body { background: var(--bg); color: var(--gold); font-family: 'Arial', sans-serif; margin: 0; padding: 10px; }
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+        :root { --gold: #c5a059; --bg: #080808; --panel: #121212; --green: #00ff9d; }
+        body { background: var(--bg); color: #fff; font-family: 'Cairo', sans-serif; margin: 0; padding: 15px; }
         
+        /* شاشة القفل */
         #lock-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .lock-box { border: 2px solid var(--gold); padding: 35px; border-radius: 15px; text-align: center; background: #111; }
-        
-        .main-container { max-width: 1200px; margin: auto; border: 2px solid var(--gold); background: #111; border-radius: 10px; display: none; overflow: hidden; }
-        
-        header { background: #000; padding: 15px; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
-        .logo img { width: 80px; filter: drop-shadow(0 0 5px var(--gold)); }
+        .lock-panel { border: 2px solid var(--gold); padding: 40px; border-radius: 15px; text-align: center; background: #050505; box-shadow: 0 0 30px rgba(197, 160, 89, 0.3); }
+        input[type="password"] { background: #000; border: 1px solid var(--gold); color: #fff; padding: 12px; border-radius: 8px; text-align: center; font-size: 18px; outline: none; }
 
-        .action-bar { padding: 15px; background: #1a1a1a; display: flex; gap: 10px; border-bottom: 1px solid #333; flex-wrap: wrap; }
-        input[type="text"] { background: #000; border: 1px solid var(--gold); color: #fff; padding: 10px; border-radius: 5px; flex: 1; min-width: 200px; }
-        .btn { background: var(--gold); color: #000; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        .container { max-width: 1300px; margin: auto; display: none; }
+        header { border-bottom: 2px solid var(--gold); padding: 15px; display: flex; justify-content: space-between; background: var(--panel); margin-bottom: 15px; border-radius: 10px; }
 
-        table { width: 100%; border-collapse: collapse; background: #000; }
-        th { background: var(--gold); color: #000; padding: 12px; font-size: 14px; }
-        td { border-bottom: 1px solid #222; padding: 10px; text-align: center; color: #ddd; }
-        tr:hover { background: #151515; cursor: pointer; }
+        /* شريط البحث والإضافة */
+        .ops-grid { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-input { background: var(--panel); border: 1px solid #333; color: #fff; padding: 15px; border-radius: 10px; flex: 2; font-size: 16px; border-right: 5px solid var(--gold); outline: none; }
+        .add-btn { background: var(--gold); color: #000; border: none; padding: 10px 25px; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; }
+        .add-btn:hover { background: #fff; }
+
+        /* الجدول */
+        .table-wrap { background: var(--panel); border-radius: 10px; border: 1px solid #222; max-height: 65vh; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: var(--gold); color: #000; padding: 12px; position: sticky; top: 0; z-index: 10; }
+        td { padding: 12px; text-align: center; border-bottom: 1px solid #1a1a1a; }
+        tr:hover { background: #1a1a1a; cursor: pointer; }
 
         /* الأضبارة */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 1000; overflow-y: auto; }
-        .modal-box { background: #111; width: 95%; max-width: 900px; margin: 20px auto; border: 2px solid var(--gold); border-radius: 8px; position: relative; }
-        
-        .tabs { display: flex; background: #000; border-bottom: 1px solid var(--gold); }
-        .tab { padding: 12px; color: var(--gold); cursor: pointer; flex: 1; text-align: center; font-size: 12px; }
-        .tab.active { background: var(--gold); color: #000; font-weight: bold; }
-        .pane { display: none; padding: 20px; }
-        .pane.active { display: block; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; }
+        .modal-box { background: #0c0c0c; width: 95%; max-width: 800px; margin: 40px auto; border: 1px solid var(--gold); border-radius: 15px; overflow: hidden; }
+        .modal-header { background: var(--gold); color: #000; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; }
+        .info-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #1a1a1a; }
+        .info-row b { color: var(--gold); }
 
-        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .item { border-bottom: 1px solid #222; padding: 8px; display: flex; justify-content: space-between; }
-        .money { color: var(--green); font-weight: bold; }
-
-        @media print { .no-print { display: none; } .modal { position: static; display: block; } .tab, .tabs { display: none; } .pane { display: block !important; } }
+        @media print { .no-print { display: none; } .print-area { display: block !important; background: #fff; color: #000; padding: 40px; border: 10px double #000; } }
+        .print-area { display: none; }
     </style>
 </head>
 <body>
 
 <div id="lock-screen">
-    <div class="lock-box">
-        <img src="367.gif" width="100">
-        <h2 style="color: var(--gold);">نظام الاستعلام والاستيراد الجماعي</h2>
-        <input type="password" id="passInput" placeholder="أدخل شفرة الوصول" style="text-align:center; padding:10px; margin-bottom:15px; background:#000; border:1px solid var(--gold); color:#fff;">
-        <br>
-        <button class="btn" onclick="checkPass()">دخول سيدي</button>
+    <div class="lock-panel">
+        <h2 style="color: var(--gold);">منظومة ميسان الاستخباراتية v19.0</h2>
+        <input type="password" id="pInp" placeholder="أدخل الشفرة">
+        <br><br>
+        <button class="add-btn" onclick="login()">فتح النظام سيدي</button>
     </div>
 </div>
 
-<div class="main-container no-print" id="mainUI">
+<div class="container" id="mainUI">
     <header>
-        <div class="logo"><img src="367.gif"></div>
-        <div style="text-align:center">
-            <h1 style="margin:0; font-size: 18px;">قاعدة البيانات المركزية - مكتب ميسان</h1>
-            <p style="margin:0; font-size: 11px;">الاستخبارات | المالية | الذمم</p>
+        <div>
+            <h1 style="margin:0; font-size: 20px;">نظام الاستعلام والإدارة المركزية</h1>
+            <small style="color: var(--gold);">قاطع ميسان - قاعدة البيانات الموحدة</small>
         </div>
-        <div style="font-size: 10px; color: var(--green);">MODE: BULK IMPORT</div>
+        <div style="color: var(--green); text-align: left;">
+            <div id="clock"></div>
+            <span style="font-size: 10px;">نظام البحث النشط: ON</span>
+        </div>
     </header>
 
-    <div class="action-bar">
-        <input type="text" id="search" onkeyup="filter()" placeholder="🔍 ابحث عن أي معلومة...">
-        
-        <button class="btn" onclick="document.getElementById('importTxt').click()">📁 استيراد ملف جماعي (TXT)</button>
-        <input type="file" id="importTxt" hidden accept=".txt" onchange="handleBulkImport(event)">
-        
-        <button class="btn" style="background:#444; color:#fff;" onclick="addNewManual()">+ إضافة يدوي</button>
-        <button class="btn" style="background:#ff3333; color:#fff;" onclick="clearAll()">تصفير</button>
+    <div class="ops-grid">
+        <input type="text" id="search" onkeyup="searchEngine()" class="search-input" placeholder="🔍 ابحث عن أي شخص (اسم، لقب، منطقة، صنف)...">
+        <button class="add-btn" onclick="addNew()">+ إضافة منتسب جديد للقائمة</button>
     </div>
 
-    <table id="table">
-        <thead>
-            <tr><th>المعرف</th><th>الاسم الكامل</th><th>الصنف</th><th>الراتب</th><th>الحالة</th></tr>
-        </thead>
-        <tbody id="body"></tbody>
-    </table>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>ID</th><th>الاسم الكامل</th><th>المنطقة</th><th>الصنف</th><th>الراتب المستلم</th></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
 </div>
 
-<div id="modal" class="modal">
+<div id="modal" class="modal no-print">
     <div class="modal-box">
-        <div class="no-print" style="background:var(--gold); padding:10px; color:#000; display:flex; justify-content:space-between; font-weight:bold;">
-            <span>الملف الإلكتروني للمنتسب</span>
-            <span style="cursor:pointer;" onclick="closeM()">[ إغلاق ]</span>
+        <div class="modal-header">
+            <span>ملف المنتسب الاستخباراتي</span>
+            <span style="cursor:pointer" onclick="closeM()">X</span>
         </div>
-        <div class="tabs no-print">
-            <div class="tab active" onclick="showT(event, 't1')">البيانات الإدارية</div>
-            <div class="tab" onclick="showT(event, 't2')">الذمة والعتاد</div>
-            <div class="tab" onclick="showT(event, 't3')">السجل المالي</div>
+        <div id="modalContent"></div>
+        <div style="padding: 20px; background: #000; display: flex; gap: 10px;">
+            <button class="add-btn" onclick="window.print()">طباعة تفويض رسمي</button>
+            <button class="add-btn" style="background:#444; color:#fff;" onclick="closeM()">إغلاق</button>
         </div>
-        <div id="t1" class="pane active"><div class="data-grid" id="d1"></div></div>
-        <div id="t2" class="pane"><div class="data-grid" id="d2"></div></div>
-        <div id="t3" class="pane"><div class="data-grid" id="d3"></div></div>
-        <div style="padding:20px;" class="no-print"><button class="btn" onclick="window.print()">طباعة الملف</button></div>
+    </div>
+</div>
+
+<div id="printArea" class="print-area">
+    <div style="text-align: center;">
+        <h2>كتاب تفويض رسمي</h2>
+        <p>العدد: م/س/٢٠٢٦</p>
+    </div>
+    <div style="margin: 40px 0; text-align: right; font-size: 20px; line-height: 2;">
+        نؤيد لكم بأن السيد: <b id="pr-name"></b><br>
+        من سكنة منطقة: <b id="pr-area"></b><br>
+        وبحكم منصبه في صنف (<b id="pr-branch"></b>)، مخول بكافة الصلاحيات الرسمية ضمن قاطع ميسان.
+    </div>
+    <div style="margin-top: 100px; text-align: left;">
+        <b>آمر مكتب ميسان</b><br>
+        قيادة العمليات
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem("bulk_maysan_db") || "[]");
+    // 1. قاعدة البيانات الثابتة (100 اسم)
+    const fixedNames = ["محمد", "علي", "حسين", "عباس", "سجاد", "حيدر", "مرتضى", "جعفر", "مصطفى", "كرار"];
+    const fixedSurnames = ["البهادلي", "الساعدي", "الفرطوسي", "الكناني", "الشويلي", "البزوني", "اللامي", "المرياني", "الدراجي", "الزبيدي"];
+    const fixedAreas = ["العمارة", "المجر الكبير", "قلعة صالح", "المشرح", "الكحلاء", "ميمونة", "علي الغربي"];
+    const fixedBranches = ["استخبارات", "دروع", "مشاة", "أمن", "استطلاع"];
 
-    function checkPass() {
-        if(document.getElementById("passInput").value === "2026") {
-            document.getElementById("lock-screen").style.display = "none";
-            document.getElementById("mainUI").style.display = "block";
-            render();
+    let masterDB = [];
+
+    // توليد الـ 100 اسم سيدي
+    for(let i=1; i<=100; i++) {
+        masterDB.push({
+            id: 8800 + i,
+            name: fixedNames[i%10] + " " + fixedSurnames[(i+2)%10] + " " + fixedSurnames[i%10],
+            area: fixedAreas[i%7],
+            branch: fixedBranches[i%5],
+            salary: "1,150,000",
+            status: "سليم"
+        });
+    }
+
+    // 2. تحميل الأسماء "المضافة يدوياً" من الذاكرة
+    let customDB = JSON.parse(localStorage.getItem('maysan_custom_names') || '[]');
+    let fullDB = [...masterDB, ...customDB];
+
+    function login() {
+        if(document.getElementById('pInp').value === '2026') {
+            document.getElementById('lock-screen').style.display = 'none';
+            document.getElementById('mainUI').style.display = 'block';
+            renderTable();
         } else { alert("الشفرة خاطئة سيدي!"); }
     }
 
-    function render() {
-        let h = "";
-        db.forEach((p, i) => {
-            h += `<tr onclick="openM(${i})">
-                <td>${p.id}</td>
-                <td style="color:#fff; font-weight:bold;">${p.name}</td>
-                <td>${p.branch}</td>
-                <td class="money">${p.salary} د.ع</td>
-                <td style="color:var(--green)">سليم</td>
+    function renderTable() {
+        let body = document.getElementById('tableBody');
+        body.innerHTML = "";
+        fullDB.forEach((p, i) => {
+            body.innerHTML += `<tr onclick="openProfile(${i})">
+                <td>#${p.id}</td><td>${p.name}</td><td>${p.area}</td><td>${p.branch}</td><td style="color:var(--green)">${p.salary}</td>
             </tr>`;
         });
-        document.getElementById("body").innerHTML = h;
     }
 
-    // محرك الاستيراد الجماعي سيدي
-    function handleBulkImport(event) {
-        let file = event.target.files[0];
-        if (!file) return;
+    function searchEngine() {
+        let val = document.getElementById('search').value.toLowerCase();
+        let rows = document.querySelectorAll('tbody tr');
+        rows.forEach(r => {
+            r.style.display = r.innerText.toLowerCase().includes(val) ? '' : 'none';
+        });
+    }
 
-        let reader = new FileReader();
-        reader.onload = function(e) {
-            let lines = e.target.result.split('\n');
-            let count = 0;
-            lines.forEach(line => {
-                if(line.trim() !== "") {
-                    let parts = line.split(','); // التنسيق: الاسم, الصنف, الراتب
-                    let p = {
-                        id: "M-" + Math.floor(10000 + Math.random() * 90000),
-                        name: parts[0] ? parts[0].trim() : "غير معرف",
-                        branch: parts[1] ? parts[1].trim() : "مشاة",
-                        salary: parts[2] ? parts[2].trim() : "1,100,000",
-                        addr: "ميسان", brig: "لواء 1", rank: "مقاتل", weap: "AK-47",
-                        weap_sn: "SN-" + Math.floor(Math.random()*999), gear: "كاملة",
-                        bank: "الرافدين", master: "6020 XXXX", allow: "خطورة", stat: "سليم"
-                    };
-                    db.push(p);
-                    count++;
-                }
-            });
-            localStorage.setItem("bulk_maysan_db", JSON.stringify(db));
-            alert("سيدي، تم استيراد " + count + " منتسب بنجاح.");
-            render();
+    function addNew() {
+        let n = prompt("الاسم الكامل للمنتسب الجديد:");
+        if(!n) return;
+        let a = prompt("المنطقة في ميسان (مثلاً: المجر):");
+        let b = prompt("الصنف (مثلاً: استخبارات):");
+        let s = prompt("الراتب:", "1,200,000");
+
+        let newItem = {
+            id: Math.floor(10000 + Math.random()*9000),
+            name: n, area: a, branch: b, salary: s, status: "سليم"
         };
-        reader.readAsText(file);
+
+        customDB.push(newItem);
+        localStorage.setItem('maysan_custom_names', JSON.stringify(customDB));
+        fullDB = [...masterDB, ...customDB]; // تحديث القائمة الشاملة
+        renderTable();
+        alert("سيدي، تم إضافة المنتسب بنجاح وحفظه في القاعدة.");
     }
 
-    function openM(i) {
-        let p = db[i];
-        fill("d1", {"الاسم":p.name, "المعرف":p.id, "الصنف":p.branch, "الرتبة":p.rank, "السكن":p.addr, "الموقف":p.stat});
-        fill("d2", {"نوع السلاح":p.weap, "رقم السلاح":p.weap_sn, "التجهيزات":p.gear, "اللواء":p.brig});
-        fill("d3", {"الراتب المستلم":p.salary + " د.ع", "المصرف":p.bank, "الماستر كارد":p.master, "المخصصات":p.allow});
-        document.getElementById("modal").style.display = "block";
+    function openProfile(i) {
+        let p = fullDB[i];
+        document.getElementById('modalContent').innerHTML = `
+            <div class="info-row"><b>الاسم الرباعي:</b> <span>${p.name}</span></div>
+            <div class="info-row"><b>المنطقة والقاطع:</b> <span>${p.area}</span></div>
+            <div class="info-row"><b>الصنف العسكري:</b> <span>${p.branch}</span></div>
+            <div class="info-row"><b>الموقف الأمني:</b> <span style="color:var(--green)">${p.status}</span></div>
+            <div class="info-row"><b>الراتب والمستحقات:</b> <span>${p.salary} د.ع</span></div>
+        `;
+        // تجهيز بيانات الطباعة
+        document.getElementById('pr-name').innerText = p.name;
+        document.getElementById('pr-area').innerText = p.area;
+        document.getElementById('pr-branch').innerText = p.branch;
+        
+        document.getElementById('modal').style.display = 'block';
     }
 
-    function fill(id, data) {
-        let h = "";
-        for (let k in data) h += `<div class="item"><span style="color:var(--gold)">${k}:</span><span class="${k.includes('الراتب')?'money':''}">${data[k]}</span></div>`;
-        document.getElementById(id).innerHTML = h;
-    }
-
-    function showT(e, id) {
-        let ps = document.getElementsByClassName("pane"), ts = document.getElementsByClassName("tab");
-        for(let x of ps) x.classList.remove("active");
-        for(let x of ts) x.classList.remove("active");
-        document.getElementById(id).classList.add("active");
-        e.currentTarget.classList.add("active");
-    }
-
-    function closeM() { document.getElementById("modal").style.display = "none"; }
-    function filter() {
-        let v = document.getElementById("search").value.toUpperCase();
-        let tr = document.getElementById("table").getElementsByTagName("tr");
-        for(let i=1; i<tr.length; i++) tr[i].style.display = tr[i].innerText.toUpperCase().includes(v) ? "" : "none";
-    }
-    function clearAll() { if(confirm("تصفير كافة السجلات سيدي؟")) { localStorage.removeItem("bulk_maysan_db"); location.reload(); } }
+    function closeM() { document.getElementById('modal').style.display = 'none'; }
+    setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString('ar-EG'), 1000);
 </script>
 </body>
 </html>
