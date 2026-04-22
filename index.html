@@ -3,321 +3,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة وتخويل الأفراد</title>
+    <title>CENTRAL INTELLIGENCE SYSTEM</title>
     <style>
-        body { background: #000; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; margin: 0; }
-        .secure-container { max-width: 1000px; margin: auto; border: 3px solid #d4af37; border-radius: 20px; box-shadow: 0 0 30px rgba(212,175,55,0.4); padding: 25px; background: rgba(15,15,15,0.9); text-align: center; }
+        :root { --main-gold: #d4af37; --bg-black: #050505; --neon-text: #00ff41; --border-color: #222; }
         
-        /* الشعار والترويسة */
-        #mainLogo { max-width: 250px; height: auto; margin-bottom: 20px; }
-        .header-title { font-size: 26px; font-weight: bold; color: #d4af37; margin-bottom: 30px; }
-        
-        /* أدوات التحكم والبحث */
-        #searchInput { width: 100%; max-width: 500px; padding: 12px; border: 2px solid #d4af37; border-radius: 8px; background: #fff; color: #000; font-size: 16px; margin-bottom: 20px; }
-        .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; background: #1a1a1a; padding: 20px; border-radius: 10px; }
-        input[type="text"] { padding: 12px; border-radius: 8px; border: 1px solid #d4af37; background: #000; color: #fff; width: 200px; }
-        
-        /* الأزرار */
-        button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; transition: 0.3s; }
-        .btn-add { background: #28a745; color: white; }
-        .btn-add:hover { background: #218838; }
-        .btn-print { background: #d4af37; color: black; margin-left: 5px; }
-        .btn-print:hover { background: #b8962d; }
-        .btn-delete { background: #dc3545; color: white; }
-        .btn-delete:hover { background: #c82333; }
-        
-        /* الجدول */
-        table { width: 100%; border-collapse: collapse; background: #fff; color: #000; margin-top: 15px; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        th, td { border: 1px solid #eee; padding: 15px; text-align: center; }
-        th { background: #d4af37; color: black; font-weight: bold; font-size: 16px; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        tr:hover { background-color: #f1f1f1; }
+        body { background-color: var(--bg-black); color: var(--main-gold); font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; }
 
-        /* منطقة التخويل عند الطباعة */
+        /* شاشة التحميل الاستخباراتية */
+        #loading-screen { position: fixed; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .scanner { width: 300px; height: 2px; background: var(--neon-text); box-shadow: 0 0 15px var(--neon-text); animation: scan 2s infinite; }
+        @keyframes scan { 0%, 100% { transform: translateY(-50px); } 50% { transform: translateY(50px); } }
+
+        /* الحاوية الرئيسية */
+        .system-container { max-width: 1200px; margin: 10px auto; border: 2px solid var(--main-gold); background: rgba(10,10,10,0.95); min-height: 90vh; display: none; position: relative; box-shadow: 0 0 40px rgba(212,175,55,0.2); }
+
+        /* الهيدر */
+        header { border-bottom: 2px solid var(--main-gold); padding: 20px; display: flex; justify-content: space-between; align-items: center; background: #111; }
+        .logo-section img { width: 120px; filter: drop-shadow(0 0 5px var(--main-gold)); }
+        .status-panel { text-align: left; font-size: 12px; color: var(--neon-text); }
+
+        /* نظام التبويبات */
+        .nav-tabs { display: flex; background: #1a1a1a; border-bottom: 1px solid var(--main-gold); }
+        .tab-link { padding: 15px 25px; cursor: pointer; border-left: 1px solid #333; font-weight: bold; transition: 0.3s; }
+        .tab-link:hover, .tab-link.active { background: var(--main-gold); color: #000; }
+
+        .tab-content { padding: 30px; display: none; }
+        .tab-content.active { display: block; }
+
+        /* المدخلات والأزرار */
+        .input-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        input { background: #000; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 4px; outline: none; }
+        input:focus { border-color: var(--main-gold); box-shadow: 0 0 10px var(--main-gold); }
+        .btn-action { background: var(--main-gold); color: #000; border: none; padding: 12px 30px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        .btn-action:hover { background: #fff; transform: scale(1.05); }
+
+        /* الجدول العسكري */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #000; }
+        th { background: #222; color: var(--main-gold); padding: 15px; text-align: center; border: 1px solid #333; }
+        td { padding: 12px; border: 1px solid #222; text-align: center; color: #ccc; }
+        tr:hover { background: rgba(212,175,55,0.05); }
+
+        /* --- تصميم التخويل (ID CARD) الفول --- */
+        #id-card-print { display: none; width: 210mm; height: 297mm; background: #fff; padding: 20px; }
+        .official-doc { border: 15px double #000; height: 100%; position: relative; padding: 40px; box-sizing: border-box; background: url('367.gif') no-repeat center; background-size: 40%; background-color: rgba(255,255,255,0.9); background-blend-mode: overlay; }
+        .doc-header { display: flex; justify-content: space-between; border-bottom: 4px solid #000; padding-bottom: 10px; margin-bottom: 30px; }
+        .doc-title { text-align: center; font-size: 36px; text-decoration: underline; margin: 40px 0; font-weight: bold; }
+        .doc-body { font-size: 24px; line-height: 2; text-align: right; }
+        .stamp-area { margin-top: 80px; display: flex; justify-content: space-between; align-items: center; }
+        .red-stamp { width: 160px; height: 160px; border: 6px dashed red; border-radius: 50%; color: red; display: flex; align-items: center; justify-content: center; font-weight: bold; transform: rotate(-15deg); font-size: 20px; }
+
         @media print {
             body * { visibility: hidden; }
-            #takhwilArea, #takhwilArea * { visibility: visible; }
-            #takhwilArea { position: absolute; left: 0; top: 0; width: 100%; color: black !important; background: white !important; font-family: 'Times New Roman', serif; }
+            #id-card-print, #id-card-print * { visibility: visible; }
+            #id-card-print { display: block; position: absolute; left: 0; top: 0; }
         }
     </style>
-    
-    <script>
-        // قفل الدخول (نفس الرمز القديم 2026 سيدي)
-        (function() {
-            var pass = prompt("سيدي، يرجى إدخال رمز الدخول:");
-            if (pass !== "2026") { 
-                alert("الرمز غير صحيح سيدي.");
-                window.location.href = "https://google.com"; 
-                document.documentElement.innerHTML = "";
-            }
-        })();
-
-        // تحميل البيانات المحفوظة (من LocalStorage)
-        window.onload = renderTable;
-
-        // دالة الإضافة مع الحفظ التلقائي
-        function addPerson() {
-            var name = document.getElementById("newName").value;
-            var rank = document.getElementById("newRank").value;
-            var office = document.getElementById("newOffice").value;
-            if(!name || !rank || !office) return alert("سيدي، يرجى إكمال كافة البيانات.");
-            
-            var person = { name, rank, office, date: new Date().toLocaleDateString('ar-EG') };
-            var people = JSON.parse(localStorage.getItem("aahlData") || "[]");
-            people.push(person);
-            localStorage.setItem("aahlData", JSON.stringify(people));
-            
-            renderTable();
-            // مسح الخانات
-            document.getElementById("newName").value = "";
-            document.getElementById("newRank").value = "";
-            document.getElementById("newOffice").value = "";
-        }
-
-        // دالة رسم الجدول واسترجاع البيانات
-        function renderTable() {
-            var people = JSON.parse(localStorage.getItem("aahlData") || "[]");
-            var tableBody = document.getElementById("mainTable").getElementsByTagName('tbody')[0];
-            tableBody.innerHTML = "";
-            people.forEach((p, index) => {
-                var row = tableBody.insertRow();
-                row.innerHTML = `<td>${p.name}</td><td>${p.rank}</td><td>${p.office}</td>
-                                 <td>
-                                    <button class="btn-print" onclick="printFinalTakhwil('${p.name}','${p.rank}','${p.office}','${p.date}')">طباعة التخويل</button>
-                                    <button class="btn-delete" onclick="deletePerson(${index})">حذف</button>
-                                 </td>`;
-            });
-        }
-
-        // دالة البحث الفوري
-        function filterTable() {
-            var input = document.getElementById("searchInput").value.toUpperCase();
-            var rows = document.getElementById("mainTable").getElementsByTagName("tr");
-            for (var i = 1; i < rows.length; i++) {
-                var nameCell = rows[i].getElementsByTagName("td")[0];
-                if (nameCell) {
-                    var textValue = nameCell.textContent || nameCell.innerText;
-                    rows[i].style.display = textValue.toUpperCase().indexOf(input) > -1 ? "" : "none";
-                }
-            }
-        }
-
-        // دالة الحذف
-        function deletePerson(index) {
-            if(confirm("سيدي، هل أنت متأكد من حذف هذا الاسم؟")) {
-                var people = JSON.parse(localStorage.getItem("aahlData") || "[]");
-                people.splice(index, 1);
-                localStorage.setItem("aahlData", JSON.stringify(people));
-                renderTable();
-            }
-        }
-
-        // دالة طباعة التخويل النهائي الجاهز والمختوم
-        function printFinalTakhwil(name, rank, office, date) {
-            var printArea = document.getElementById('takhwilArea');
-            printArea.innerHTML = `
-                <div style="border: 15px double #000; padding: 40px; text-align: center; position: relative;">
-                    <div style="float: left; text-align: left;">التاريخ: ${date}<br>الرقم: 000000</div>
-                    <div style="margin-bottom: 20px;"><b>بسم الله الرحمن الرحيم</b><br>المقاومة الإسلامية - هيئة الحشد الشعبي</div>
-                    
-                    <img src="logo.gif" style="max-width: 150px; height: auto; margin: 10px auto;">
-                    
-                    <div style="font-size: 28px; font-weight: bold; margin: 20px 0;">كتاب تخويل رسمي</div>
-                    <hr style="border: 2px solid #000;">
-                    
-                    <div style="font-size: 22px; text-align: right; line-height: 2; margin-top: 30px; font-family: 'Times New Roman', serif;">
-                        نخول حامل هذا الكتاب المجاهد الأخ: <b><u>&nbsp;&nbsp;&nbsp;${name}&nbsp;&nbsp;&nbsp;</u></b><br>
-                        الصنف / الرتبة: <b><u>&nbsp;&nbsp;&nbsp;${rank}&nbsp;&nbsp;&nbsp;</u></b><br>
-                        الجهة المنتسب إليها: <b><u>&nbsp;&nbsp;&nbsp;${office}&nbsp;&nbsp;&nbsp;</u></b><br>
-                        للتحرك والقيام بالمهام القتالية والأمنية الموكلة إليه، ويرجى من كافة القواطع والسيطرات تسهيل أمره وتذليل كافة العقبات أمام حركته.
-                    </div>
-                    
-                    <div style="margin-top: 60px; display: flex; justify-content: space-between; align-items: flex-end;">
-                        <div style="text-align: right; font-size: 18px;">المسؤول المختص:<br>___________</div>
-                        
-                        <div style="width: 150px; height: 150px; border: 5px solid red; border-radius: 50%; color: red; font-weight: bold; font-size: 18px; display: flex; align-items: center; justify-content: center; transform: rotate(-20deg);">
-                            ختم المكتب المختص / ميسان
-                        </div>
-                        
-                        <div style="text-align: left; font-size: 18px;">توقيع الآمر:<br>___________</div>
-                    </div>
-                </div>
-            `;
-            
-            // استدعاء أمر الطباعة
-            window.print();
-            
-            // مسح منطقة الطباعة بعد الانتهاء
-            printArea.innerHTML = "";
-        }
-    </script>
 </head>
 <body>
 
-    <div id="takhwilArea" style="visibility: hidden; position: absolute;"></div>
-
-    <div class="secure-container">
-        <img id="mainLogo" src="logo.gif" alt="شعار عصائب أهل الحق">
-        
-        <div class="header-title">نظام إدارة شؤون المقاتلين وإصدار التخويلات</div>
-        <p style="color: #bbb; margin-top:-20px;">المقاومة الإسلامية - هيئة الحشد الشعبي</p>
-        <hr border="1" color="#d4af37" style="opacity: 0.3; margin-bottom: 20px;">
-
-        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="🔍 ابحث عن اسم المجاهد هنا...">
-
-        <div class="controls">
-            <input type="text" id="newName" placeholder="الاسم الكامل">
-            <input type="text" id="newRank" placeholder="الصنف / الرتبة">
-            <input type="text" id="newOffice" placeholder="المكتب / التشكيل">
-            <button class="btn-add" onclick="addPerson()">+ إضافة وحفظ دائم</button>
-        </div>
-
-        <table id="mainTable">
-            <thead>
-                <tr>
-                    <th>الاسم الكامل</th>
-                    <th>الصنف</th>
-                    <th>المكتب / الجهة</th>
-                    <th>الإجراءات</th>
-                </tr>
-            </thead>
-            <tbody>
-                </tbody>
-        </table>
-        
-        <p style="margin-top: 30px; font-size: 12px; color: #777;">نظام الإدارة المركزية - ميسان | 2026</p>
+    <div id="loading-screen">
+        <img src="367.gif" width="150">
+        <h2 style="color: var(--main-gold); margin-top: 20px;">جاري الاتصال بقاعدة البيانات المركزية...</h2>
+        <div class="scanner"></div>
+        <p id="boot-text" style="color: var(--neon-text); font-size: 12px; margin-top: 10px;"></p>
     </div>
 
-</body>
-</html>
-<div class="controls">
-    <input type="text" id="newName" placeholder="الاسم الكامل">
-    <input type="text" id="newRank" placeholder="الصنف">
-    <input type="text" id="newOffice" placeholder="المكتب">
-    <button class="btn-add" onclick="addPerson()">+ إضافة فرد</button>
-    
-    <hr style="width:100%; border:0.5px solid #333;">
-    
-    <p style="font-size:12px; color:#d4af37;">سيدي، لاستيراد قائمة كبيرة، اختر ملف نصي (.txt):</p>
-    <input type="file" id="fileInput" accept=".txt" style="width:250px;">
-    <button class="btn-print" style="background:#28a745; color:#fff;" onclick="importFromFile()">رفع القائمة</button>
-</div>
+    <div id="id-card-print">
+        <div class="official-doc">
+            <div class="doc-header">
+                <div style="font-weight:bold;">هيئة الحشد الشعبي<br>مكتب ميسان<br>قسم أمن المقاتلين</div>
+                <img src="367.gif" width="120">
+                <div style="text-align:left;">التاريخ: <span id="p-date"></span><br>الرقم: <span id="p-serial"></span></div>
+            </div>
+            <div class="doc-title">تخويل حركة وأمن سري</div>
+            <div class="doc-body">
+                نخول المجاهد: <b id="p-name" style="font-size: 32px; border-bottom: 2px solid #000;"></b><br>
+                الصنف / الاختصاص: <b id="p-rank"></b><br>
+                جهة الانتساب: <b id="p-office"></b><br>
+                <p>يسمح لحامل هذا الكتاب بالمرور عبر كافة القواطع العسكرية والسيطرات الأمنية، وتسهيل مهامه القتالية والأمنية الموكلة إليه رسمياً. يمنع الاعتراض أو التأخير تحت طائلة المسؤولية.</p>
+            </div>
+            <div class="stamp-area">
+                <div style="text-align:center;">توقيع المسؤول المختص<br><br>_____________</div>
+                <div class="red-stamp">مكتب ميسان<br>سري للغاية</div>
+                <div style="text-align:center;">توقيع وآمر المكتب<br><br>_____________</div>
+            </div>
+            <div style="margin-top: 50px; text-align: center; font-family: 'barcode'; font-size: 40px;">*SEC-INTEL-2026*</div>
+        </div>
+    </div>
 
-<script>
-    // دالة قراءة الملف النصي وإضافة الأسماء جماعياً
-    function importFromFile() {
-        var fileInput = document.getElementById('fileInput');
-        var file = fileInput.files[0];
-        if (!file) return alert("سيدي، يرجى اختيار الملف أولاً.");
+    <div class="system-container" id="main-ui">
+        <header>
+            <div class="logo-section"><img src="367.gif"></div>
+            <div style="text-align: center;">
+                <h1>نظام القيادة والسيطرة v7.0</h1>
+                <p style="margin:0; font-size: 12px; color: #888;">INTERNAL SECURITY PROTOCOL - MAYSAN HQ</p>
+            </div>
+            <div class="status-panel">
+                SYSTEM: ACTIVE<br>ENCRYPTION: AES-256<br>USER: ADMIN_MONTATHER
+            </div>
+        </header>
 
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var content = e.target.result;
-            var lines = content.split('\n'); // تقسيم الملف إلى أسطر
-            var people = JSON.parse(localStorage.getItem("aahlData") || "[]");
-            
-            lines.forEach(line => {
-                var data = line.split(','); // تقسيم السطر بناءً على الفاصلة
-                if (data.length >= 3) {
-                    people.push({
-                        name: data[0].trim(),
-                        rank: data[1].trim(),
-                        office: data[2].trim(),
-                        date: new Date().toLocaleDateString('ar-EG')
-                    });
-                }
-            });
-            
-            localStorage.setItem("aahlData", JSON.stringify(people));
-            renderTable();
-            alert("تم استيراد القائمة بنجاح سيدي.");
-        };
-        reader.readAsText(file, 'UTF-8');
-    }
-</script>
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <title>نظام إدارة وتخويل الأفراد - النسخة الاحترافية</title>
-    <style>
-        body { background: #000; color: #fff; font-family: 'Arial', sans-serif; padding: 10px; margin: 0; }
-        .secure-container { max-width: 1000px; margin: auto; border: 2px solid #d4af37; border-radius: 15px; padding: 20px; background: #111; text-align: center; }
-        #mainLogo { max-width: 180px; margin-bottom: 10px; }
-        .header-title { font-size: 24px; color: #d4af37; font-weight: bold; margin-bottom: 20px; }
-        
-        /* أدوات التحكم */
-        .controls { background: #1a1a1a; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; }
-        input[type="text"], input[type="file"] { padding: 10px; border-radius: 5px; border: 1px solid #d4af37; background: #000; color: #fff; margin: 5px; }
-        button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; transition: 0.3s; }
-        .btn-add { background: #28a745; color: white; }
-        .btn-import { background: #d4af37; color: black; }
-        .btn-print { background: #007bff; color: white; }
-        .btn-delete { background: #dc3545; color: white; }
+        <nav class="nav-tabs">
+            <div class="tab-link active" onclick="openTab(event, 'dashboard')">سجل الأفراد</div>
+            <div class="tab-link" onclick="openTab(event, 'add-entry')">إضافة بيانات</div>
+            <div class="tab-link" onclick="openTab(event, 'import-export')">قاعدة البيانات</div>
+        </nav>
 
-        /* الجدول */
-        table { width: 100%; border-collapse: collapse; background: #fff; color: #000; border-radius: 8px; overflow: hidden; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
-        th { background: #d4af37; color: #000; }
+        <div id="dashboard" class="tab-content active">
+            <input type="text" id="searchBox" onkeyup="search()" placeholder="🔍 ابحث عن اسم، صنف، أو رقم تعريفي..." style="width: 100%; margin-bottom: 20px; border-color: var(--neon-text);">
+            <table id="intelTable">
+                <thead>
+                    <tr>
+                        <th>المعرف</th>
+                        <th>الاسم الكامل</th>
+                        <th>الصنف</th>
+                        <th>المكتب</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
 
-        /* ستايل التخويل الاحترافي (للطباعة) */
-        #takhwilCard {
-            display: none; /* مخفي في الموقع ويظهر في الطباعة فقط */
-            width: 800px; height: 500px; background: #fff; color: #000;
-            border: 15px double #d4af37; padding: 30px; position: relative;
-            box-sizing: border-box; background-image: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url('logo.gif');
-            background-repeat: no-repeat; background-position: center; background-size: 40%;
-        }
+        <div id="add-entry" class="tab-content">
+            <h2 style="border-right: 4px solid var(--main-gold); padding-right: 15px;">إدخال بيانات مقاتل جديد</h2>
+            <div class="input-group">
+                <input type="text" id="inName" placeholder="الاسم الرباعي واللقب">
+                <input type="text" id="inRank" placeholder="الصنف / الرتبة">
+                <input type="text" id="inOffice" placeholder="جهة التنسيب (المكتب)">
+            </div>
+            <button class="btn-action" onclick="saveData()">+ حفظ البيانات في النظام</button>
+        </div>
 
-        @media print {
-            body * { visibility: hidden; }
-            #takhwilCard, #takhwilCard * { visibility: visible; }
-            #takhwilCard { display: block; position: fixed; left: 0; top: 0; }
-        }
-    </style>
+        <div id="import-export" class="tab-content">
+            <h2>إدارة الملفات الخارجية</h2>
+            <div style="background: #111; padding: 20px; border: 1px solid #333;">
+                <p>سيدي، يمكنك رفع ملف نصي يحتوي على الأسماء (الاسم, الصنف, المكتب):</p>
+                <input type="file" id="fileUploader" accept=".txt">
+                <button class="btn-action" onclick="importFile()">بدء الاستيراد الجماعي</button>
+                <br><br>
+                <button class="btn-action" style="background: #444; color: #fff;" onclick="clearDB()">⚠️ مسح كافة البيانات</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // الرمز السري سيدي
-        (function() {
-            var pass = prompt("سيدي، يرجى إدخال رمز الدخول:");
-            if (pass !== "2026") { window.location.href = "https://google.com"; }
-        })();
+        // نظام الدخول الأمني سيدي
+        window.onload = function() {
+            let pass = prompt("سيدي، يرجى إدخال شفرة الوصول:");
+            if (pass !== "2026") {
+                window.location.href = "https://google.com";
+            } else {
+                startBoot();
+            }
+        };
 
-        window.onload = renderTable;
+        function startBoot() {
+            let text = "INITIALIZING SYSTEM... ACCESS GRANTED... LOADING DATABASE... CONNECTING TO MAYSAN SERVER...";
+            let i = 0;
+            let speed = 50;
+            function type() {
+                if (i < text.length) {
+                    document.getElementById("boot-text").innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    setTimeout(() => {
+                        document.getElementById("loading-screen").style.display = "none";
+                        document.getElementById("main-ui").style.display = "block";
+                        renderTable();
+                    }, 1000);
+                }
+            }
+            type();
+        }
 
-        function addPerson() {
-            var name = document.getElementById("newName").value;
-            var rank = document.getElementById("newRank").value;
-            var office = document.getElementById("newOffice").value;
-            if(!name || !rank || !office) return alert("أكمل البيانات سيدي.");
-            savePerson({name, rank, office, date: new Date().toLocaleDateString('ar-EG')});
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) tabcontent[i].className = tabcontent[i].className.replace(" active", "");
+            tablinks = document.getElementsByClassName("tab-link");
+            for (i = 0; i < tablinks.length; i++) tablinks[i].className = tablinks[i].className.replace(" active", "");
+            document.getElementById(tabName).className += " active";
+            evt.currentTarget.className += " active";
+        }
+
+        function saveData() {
+            let n = document.getElementById("inName").value, r = document.getElementById("inRank").value, o = document.getElementById("inOffice").value;
+            if(!n || !r || !o) return alert("سيدي، البيانات ناقصة.");
+            let db = JSON.parse(localStorage.getItem("final_intel_db") || "[]");
+            db.push({id: "INTEL-" + Math.floor(1000 + Math.random() * 9000), name: n, rank: r, office: o, date: new Date().toLocaleDateString('ar-EG')});
+            localStorage.setItem("final_intel_db", JSON.stringify(db));
+            alert("تم الحفظ بنجاح سيدي.");
             renderTable();
-        }
-
-        function savePerson(person) {
-            var people = JSON.parse(localStorage.getItem("aahlData") || "[]");
-            people.push(person);
-            localStorage.setItem("aahlData", JSON.stringify(people));
-        }
-
-        function importFromFile() {
-            var file = document.getElementById('fileInput').files[0];
-            if (!file) return alert("اختر ملف .txt سيدي");
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var lines = e.target.result.split('\n');
-                lines.forEach(line => {
-                    var data = line.split(',');
-                    if(data.length >= 3) savePerson({name: data[0].trim(), rank: data[1].trim(), office: data[2].trim(), date: new Date().toLocaleDateString('ar-EG')});
-                });
-                renderTable();
-                alert("تم استيراد القائمة بنجاح سيدي.");
-            };
-            reader.readAsText(file, 'UTF-8');
+            document.getElementById("inName").value = ""; document.getElementById("inRank").value = ""; document.getElementById("inOffice").value = "";
         }
 
         function renderTable() {
-            var people = JSON.parse(localStorage.getItem("aahlData") || "[]");
-            var html = "";
-            people.forEach((p, i) => {
-                html += `<tr><td>${p.name}</td><td>${p.rank}</td><td>${p.office}</td>
-                         <td><button class="btn-print" onclick="prepareAndPrint('${p.name}','${p.rank}
+            let db = JSON.parse(localStorage.getItem("final_intel_db") || "[]");
+            let html = "";
+            db.forEach((item, index) => {
+                html += `<tr>
+                    <td>${item.id}</td>
+                    <td style="color:#fff; font-weight:bold;">${item.name}</td>
+                    <td>${item.rank}</td>
+                    <td>${item.office}</td>
+                    <td>
+                        <button class="btn-action" style="padding:5px 10px; font-size:11px;" onclick="printTakhwil('${item.name}','${item.rank}','${item.office}','${item.id}','${item.date}')">طباعة التخويل</button>
+                        <button class="btn-action" style="background:#600; color:#fff; padding:5px 10px; font-size:11px;" onclick="deleteRow(${index})">حذف</button>
+                    </td>
+                </tr>`;
+            });
+            document.getElementById("tableBody").innerHTML = html;
+        }
+
+        function printTakhwil(n, r, o, id, d) {
+            document.getElementById('p-name').innerText = n;
+            document.getElementById('p-rank').innerText = r;
+            document.getElementById('p-office').innerText = o;
+            document.getElementById('p-serial').innerText = id;
+            document.getElementById('p-date').innerText = d;
+            window.print();
+        }
+
+        function deleteRow(i) {
+            if(confirm("سيدي، هل أنت متأكد من مسح هذا الملف؟")) {
+                let db = JSON.parse(localStorage.getItem("final_intel_db") || "[]");
+                db.splice(i, 1);
+                localStorage.setItem("final_intel_db", JSON.stringify(db));
+                renderTable();
+            }
+        }
+
+        function search() {
+            let filter = document.getElementById("searchBox").value.toUpperCase();
+            let tr = document.getElementById("tableBody").getElementsByTagName("tr");
+            for (let i = 0; i < tr.length; i++) {
+                let td = tr[i].getElementsByTagName("td")[1];
+                if (td) {
+                    let text = td.textContent || td.innerText;
+                    tr[i].style.display = text.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+                }
+            }
+        }
+
+        function importFile() {
+            let file = document.getElementById("fileUploader").files[0];
+            if(!file) return alert("اختر الملف أولاً سيدي.");
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let lines = e.target.result.split('\n');
+                let db = JSON.parse(localStorage.getItem("final_intel_db") || "[]");
+                lines.forEach(l => {
+                    let p = l.split(',');
+                    if(p.length >= 3) db.push({id: "INTEL-" + Math.floor(1000 + Math.random() * 9000), name: p[0].trim(), rank: p[1].trim(), office: p[2].trim(), date: new Date().toLocaleDateString('ar-EG')});
+                });
+                localStorage.setItem("final_intel_db", JSON.stringify(db));
+                renderTable();
+                alert("تم استيراد القائمة بنجاح سيدي.");
+            };
+            reader.readAsText(file, "UTF-8");
+        }
+
+        function clearDB() {
+            if(confirm("سيدي، سيتم مسح السجل بالكامل، هل أنت متأكد؟")) {
+                localStorage.removeItem("final_intel_db");
+                renderTable();
+            }
+        }
+    </script>
+</body>
+</html>
