@@ -190,3 +190,48 @@
 
 </body>
 </html>
+<div class="controls">
+    <input type="text" id="newName" placeholder="الاسم الكامل">
+    <input type="text" id="newRank" placeholder="الصنف">
+    <input type="text" id="newOffice" placeholder="المكتب">
+    <button class="btn-add" onclick="addPerson()">+ إضافة فرد</button>
+    
+    <hr style="width:100%; border:0.5px solid #333;">
+    
+    <p style="font-size:12px; color:#d4af37;">سيدي، لاستيراد قائمة كبيرة، اختر ملف نصي (.txt):</p>
+    <input type="file" id="fileInput" accept=".txt" style="width:250px;">
+    <button class="btn-print" style="background:#28a745; color:#fff;" onclick="importFromFile()">رفع القائمة</button>
+</div>
+
+<script>
+    // دالة قراءة الملف النصي وإضافة الأسماء جماعياً
+    function importFromFile() {
+        var fileInput = document.getElementById('fileInput');
+        var file = fileInput.files[0];
+        if (!file) return alert("سيدي، يرجى اختيار الملف أولاً.");
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var content = e.target.result;
+            var lines = content.split('\n'); // تقسيم الملف إلى أسطر
+            var people = JSON.parse(localStorage.getItem("aahlData") || "[]");
+            
+            lines.forEach(line => {
+                var data = line.split(','); // تقسيم السطر بناءً على الفاصلة
+                if (data.length >= 3) {
+                    people.push({
+                        name: data[0].trim(),
+                        rank: data[1].trim(),
+                        office: data[2].trim(),
+                        date: new Date().toLocaleDateString('ar-EG')
+                    });
+                }
+            });
+            
+            localStorage.setItem("aahlData", JSON.stringify(people));
+            renderTable();
+            alert("تم استيراد القائمة بنجاح سيدي.");
+        };
+        reader.readAsText(file, 'UTF-8');
+    }
+</script>
