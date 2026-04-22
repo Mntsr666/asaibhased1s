@@ -235,3 +235,89 @@
         reader.readAsText(file, 'UTF-8');
     }
 </script>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>نظام إدارة وتخويل الأفراد - النسخة الاحترافية</title>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Arial', sans-serif; padding: 10px; margin: 0; }
+        .secure-container { max-width: 1000px; margin: auto; border: 2px solid #d4af37; border-radius: 15px; padding: 20px; background: #111; text-align: center; }
+        #mainLogo { max-width: 180px; margin-bottom: 10px; }
+        .header-title { font-size: 24px; color: #d4af37; font-weight: bold; margin-bottom: 20px; }
+        
+        /* أدوات التحكم */
+        .controls { background: #1a1a1a; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; }
+        input[type="text"], input[type="file"] { padding: 10px; border-radius: 5px; border: 1px solid #d4af37; background: #000; color: #fff; margin: 5px; }
+        button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; transition: 0.3s; }
+        .btn-add { background: #28a745; color: white; }
+        .btn-import { background: #d4af37; color: black; }
+        .btn-print { background: #007bff; color: white; }
+        .btn-delete { background: #dc3545; color: white; }
+
+        /* الجدول */
+        table { width: 100%; border-collapse: collapse; background: #fff; color: #000; border-radius: 8px; overflow: hidden; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background: #d4af37; color: #000; }
+
+        /* ستايل التخويل الاحترافي (للطباعة) */
+        #takhwilCard {
+            display: none; /* مخفي في الموقع ويظهر في الطباعة فقط */
+            width: 800px; height: 500px; background: #fff; color: #000;
+            border: 15px double #d4af37; padding: 30px; position: relative;
+            box-sizing: border-box; background-image: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url('logo.gif');
+            background-repeat: no-repeat; background-position: center; background-size: 40%;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #takhwilCard, #takhwilCard * { visibility: visible; }
+            #takhwilCard { display: block; position: fixed; left: 0; top: 0; }
+        }
+    </style>
+    <script>
+        // الرمز السري سيدي
+        (function() {
+            var pass = prompt("سيدي، يرجى إدخال رمز الدخول:");
+            if (pass !== "2026") { window.location.href = "https://google.com"; }
+        })();
+
+        window.onload = renderTable;
+
+        function addPerson() {
+            var name = document.getElementById("newName").value;
+            var rank = document.getElementById("newRank").value;
+            var office = document.getElementById("newOffice").value;
+            if(!name || !rank || !office) return alert("أكمل البيانات سيدي.");
+            savePerson({name, rank, office, date: new Date().toLocaleDateString('ar-EG')});
+            renderTable();
+        }
+
+        function savePerson(person) {
+            var people = JSON.parse(localStorage.getItem("aahlData") || "[]");
+            people.push(person);
+            localStorage.setItem("aahlData", JSON.stringify(people));
+        }
+
+        function importFromFile() {
+            var file = document.getElementById('fileInput').files[0];
+            if (!file) return alert("اختر ملف .txt سيدي");
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var lines = e.target.result.split('\n');
+                lines.forEach(line => {
+                    var data = line.split(',');
+                    if(data.length >= 3) savePerson({name: data[0].trim(), rank: data[1].trim(), office: data[2].trim(), date: new Date().toLocaleDateString('ar-EG')});
+                });
+                renderTable();
+                alert("تم استيراد القائمة بنجاح سيدي.");
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function renderTable() {
+            var people = JSON.parse(localStorage.getItem("aahlData") || "[]");
+            var html = "";
+            people.forEach((p, i) => {
+                html += `<tr><td>${p.name}</td><td>${p.rank}</td><td>${p.office}</td>
+                         <td><button class="btn-print" onclick="prepareAndPrint('${p.name}','${p.rank}
