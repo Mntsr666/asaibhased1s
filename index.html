@@ -2,38 +2,94 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة وتخويل الأفراد</title>
     <style>
-        body { background: #0b0b0b; color: #e0e0e0; font-family: 'Arial', sans-serif; padding: 20px; text-align: center; }
-        .card { background: #1a1a1a; border: 2px solid #d4af37; border-radius: 12px; padding: 20px; box-shadow: 0 0 20px rgba(212,175,55,0.2); max-width: 1000px; margin: auto; }
-        .header { background: #d4af37; color: #000; padding: 15px; font-weight: bold; font-size: 22px; border-radius: 8px; margin-bottom: 20px; }
+        body { background: #000; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; margin: 0; }
+        .secure-container { max-width: 1000px; margin: auto; border: 3px solid #d4af37; border-radius: 20px; box-shadow: 0 0 30px rgba(212,175,55,0.4); padding: 25px; background: rgba(15,15,15,0.9); text-align: center; }
         
-        /* أدوات التحكم */
-        .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px; background: #222; padding: 15px; border-radius: 8px; }
-        input { padding: 10px; border-radius: 5px; border: 1px solid #d4af37; background: #000; color: #fff; width: 180px; }
-        #searchInput { width: 100%; max-width: 400px; border-width: 2px; font-weight: bold; }
+        /* الشعار والترويسة */
+        #mainLogo { max-width: 250px; height: auto; margin-bottom: 20px; }
+        .header-title { font-size: 26px; font-weight: bold; color: #d4af37; margin-bottom: 30px; }
         
-        table { width: 100%; border-collapse: collapse; background: #fff; color: #000; margin-top: 10px; border-radius: 8px; overflow: hidden; }
-        th, td { border: 1px solid #ccc; padding: 12px; text-align: center; }
-        th { background: #d4af37; }
+        /* أدوات التحكم والبحث */
+        #searchInput { width: 100%; max-width: 500px; padding: 12px; border: 2px solid #d4af37; border-radius: 8px; background: #fff; color: #000; font-size: 16px; margin-bottom: 20px; }
+        .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; background: #1a1a1a; padding: 20px; border-radius: 10px; }
+        input[type="text"] { padding: 12px; border-radius: 8px; border: 1px solid #d4af37; background: #000; color: #fff; width: 200px; }
         
-        button { padding: 8px 15px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+        /* الأزرار */
+        button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; transition: 0.3s; }
         .btn-add { background: #28a745; color: white; }
-        .btn-print { background: #007bff; color: white; }
+        .btn-add:hover { background: #218838; }
+        .btn-print { background: #d4af37; color: black; margin-left: 5px; }
+        .btn-print:hover { background: #b8962d; }
+        .btn-delete { background: #dc3545; color: white; }
+        .btn-delete:hover { background: #c82333; }
+        
+        /* الجدول */
+        table { width: 100%; border-collapse: collapse; background: #fff; color: #000; margin-top: 15px; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        th, td { border: 1px solid #eee; padding: 15px; text-align: center; }
+        th { background: #d4af37; color: black; font-weight: bold; font-size: 16px; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #f1f1f1; }
 
-        /* ستايل التخويل عند الطباعة */
+        /* منطقة التخويل عند الطباعة */
         @media print {
             body * { visibility: hidden; }
-            #printArea, #printArea * { visibility: visible; }
-            #printArea { position: absolute; left: 0; top: 0; width: 100%; color: black; background: white; padding: 40px; border: 5px double #000; }
+            #takhwilArea, #takhwilArea * { visibility: visible; }
+            #takhwilArea { position: absolute; left: 0; top: 0; width: 100%; color: black !important; background: white !important; font-family: 'Times New Roman', serif; }
         }
     </style>
+    
     <script>
-        // قفل الدخول
-        var pass = prompt("سيدي، يرجى إدخال رمز الدخول:");
-        if (pass !== "2026") { window.location.href = "https://google.com"; }
+        // قفل الدخول (نفس الرمز القديم 2026 سيدي)
+        (function() {
+            var pass = prompt("سيدي، يرجى إدخال رمز الدخول:");
+            if (pass !== "2026") { 
+                alert("الرمز غير صحيح سيدي.");
+                window.location.href = "https://google.com"; 
+                document.documentElement.innerHTML = "";
+            }
+        })();
 
-        // دالة البحث
+        // تحميل البيانات المحفوظة (من LocalStorage)
+        window.onload = renderTable;
+
+        // دالة الإضافة مع الحفظ التلقائي
+        function addPerson() {
+            var name = document.getElementById("newName").value;
+            var rank = document.getElementById("newRank").value;
+            var office = document.getElementById("newOffice").value;
+            if(!name || !rank || !office) return alert("سيدي، يرجى إكمال كافة البيانات.");
+            
+            var person = { name, rank, office, date: new Date().toLocaleDateString('ar-EG') };
+            var people = JSON.parse(localStorage.getItem("aahlData") || "[]");
+            people.push(person);
+            localStorage.setItem("aahlData", JSON.stringify(people));
+            
+            renderTable();
+            // مسح الخانات
+            document.getElementById("newName").value = "";
+            document.getElementById("newRank").value = "";
+            document.getElementById("newOffice").value = "";
+        }
+
+        // دالة رسم الجدول واسترجاع البيانات
+        function renderTable() {
+            var people = JSON.parse(localStorage.getItem("aahlData") || "[]");
+            var tableBody = document.getElementById("mainTable").getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = "";
+            people.forEach((p, index) => {
+                var row = tableBody.insertRow();
+                row.innerHTML = `<td>${p.name}</td><td>${p.rank}</td><td>${p.office}</td>
+                                 <td>
+                                    <button class="btn-print" onclick="printFinalTakhwil('${p.name}','${p.rank}','${p.office}','${p.date}')">طباعة التخويل</button>
+                                    <button class="btn-delete" onclick="deletePerson(${index})">حذف</button>
+                                 </td>`;
+            });
+        }
+
+        // دالة البحث الفوري
         function filterTable() {
             var input = document.getElementById("searchInput").value.toUpperCase();
             var rows = document.getElementById("mainTable").getElementsByTagName("tr");
@@ -46,75 +102,91 @@
             }
         }
 
-        // دالة الإضافة
-        function addPerson() {
-            var name = document.getElementById("newName").value;
-            var rank = document.getElementById("newRank").value;
-            var office = document.getElementById("newOffice").value;
-            if(!name || !rank || !office) return alert("سيدي، أكمل البيانات أولاً");
-            
-            var table = document.getElementById("mainTable").getElementsByTagName('tbody')[0];
-            var row = table.insertRow();
-            row.innerHTML = `<td>${name}</td><td>${rank}</td><td>${office}</td>
-                             <td><button class="btn-print" onclick="printTakhwil('${name}','${rank}','${office}')">إصدار تخويل</button></td>`;
-            document.getElementById("newName").value = "";
-            document.getElementById("newRank").value = "";
-            document.getElementById("newOffice").value = "";
+        // دالة الحذف
+        function deletePerson(index) {
+            if(confirm("سيدي، هل أنت متأكد من حذف هذا الاسم؟")) {
+                var people = JSON.parse(localStorage.getItem("aahlData") || "[]");
+                people.splice(index, 1);
+                localStorage.setItem("aahlData", JSON.stringify(people));
+                renderTable();
+            }
         }
 
-        // دالة طباعة التخويل
-        function printTakhwil(name, rank, office) {
-            var printWindow = window.open('', '', 'height=600,width=800');
-            printWindow.document.write('<html><head><title>تخويل رسمي</title>');
-            printWindow.document.write('<style>body{font-family:Arial; text-align:center; padding:50px; border:10px solid #d4af37;} .header{font-size:24px; font-weight:bold; margin-bottom:20px;} .content{font-size:20px; line-height:2;} .footer{margin-top:50px; text-align:left; font-weight:bold;}</style>');
-            printWindow.document.write('</head><body dir="rtl">');
-            printWindow.document.write('<div class="header">هيئة الحشد الشعبي / عصائب أهل الحق</div>');
-            printWindow.document.write('<div class="header">كتاب تخويل رسمي</div>');
-            printWindow.document.write('<hr><div class="content">');
-            printWindow.document.write('نخول حامل هذه الهوية الأخ المجاهد: <b>' + name + '</b><br>');
-            printWindow.document.write('الصنف: <b>' + rank + '</b><br>');
-            printWindow.document.write('جهة التنسيب: <b>' + office + '</b><br>');
-            printWindow.document.write('للقيام بالمهام الموكلة إليه وتسهيل أمره في كافة السيطرات والقواطع.');
-            printWindow.document.write('</div><div class="footer">توقيع آمر المكتب/ ميسان<br><br>_____________</div>');
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
+        // دالة طباعة التخويل النهائي الجاهز والمختوم
+        function printFinalTakhwil(name, rank, office, date) {
+            var printArea = document.getElementById('takhwilArea');
+            printArea.innerHTML = `
+                <div style="border: 15px double #000; padding: 40px; text-align: center; position: relative;">
+                    <div style="float: left; text-align: left;">التاريخ: ${date}<br>الرقم: 000000</div>
+                    <div style="margin-bottom: 20px;"><b>بسم الله الرحمن الرحيم</b><br>المقاومة الإسلامية - هيئة الحشد الشعبي</div>
+                    
+                    <img src="logo.gif" style="max-width: 150px; height: auto; margin: 10px auto;">
+                    
+                    <div style="font-size: 28px; font-weight: bold; margin: 20px 0;">كتاب تخويل رسمي</div>
+                    <hr style="border: 2px solid #000;">
+                    
+                    <div style="font-size: 22px; text-align: right; line-height: 2; margin-top: 30px; font-family: 'Times New Roman', serif;">
+                        نخول حامل هذا الكتاب المجاهد الأخ: <b><u>&nbsp;&nbsp;&nbsp;${name}&nbsp;&nbsp;&nbsp;</u></b><br>
+                        الصنف / الرتبة: <b><u>&nbsp;&nbsp;&nbsp;${rank}&nbsp;&nbsp;&nbsp;</u></b><br>
+                        الجهة المنتسب إليها: <b><u>&nbsp;&nbsp;&nbsp;${office}&nbsp;&nbsp;&nbsp;</u></b><br>
+                        للتحرك والقيام بالمهام القتالية والأمنية الموكلة إليه، ويرجى من كافة القواطع والسيطرات تسهيل أمره وتذليل كافة العقبات أمام حركته.
+                    </div>
+                    
+                    <div style="margin-top: 60px; display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div style="text-align: right; font-size: 18px;">المسؤول المختص:<br>___________</div>
+                        
+                        <div style="width: 150px; height: 150px; border: 5px solid red; border-radius: 50%; color: red; font-weight: bold; font-size: 18px; display: flex; align-items: center; justify-content: center; transform: rotate(-20deg);">
+                            ختم المكتب المختص / ميسان
+                        </div>
+                        
+                        <div style="text-align: left; font-size: 18px;">توقيع الآمر:<br>___________</div>
+                    </div>
+                </div>
+            `;
+            
+            // استدعاء أمر الطباعة
+            window.print();
+            
+            // مسح منطقة الطباعة بعد الانتهاء
+            printArea.innerHTML = "";
         }
     </script>
 </head>
 <body>
 
-<div class="card">
-    <div class="header">نظام إدارة الأفراد وإصدار التخويلات</div>
+    <div id="takhwilArea" style="visibility: hidden; position: absolute;"></div>
 
-    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="🔍 ابحث عن اسم المجاهد هنا...">
+    <div class="secure-container">
+        <img id="mainLogo" src="logo.gif" alt="شعار عصائب أهل الحق">
+        
+        <div class="header-title">نظام إدارة شؤون المقاتلين وإصدار التخويلات</div>
+        <p style="color: #bbb; margin-top:-20px;">المقاومة الإسلامية - هيئة الحشد الشعبي</p>
+        <hr border="1" color="#d4af37" style="opacity: 0.3; margin-bottom: 20px;">
 
-    <div class="controls">
-        <input type="text" id="newName" placeholder="الاسم الكامل">
-        <input type="text" id="newRank" placeholder="الصنف">
-        <input type="text" id="newOffice" placeholder="المكتب">
-        <button class="btn-add" onclick="addPerson()">+ إضافة للنظام</button>
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="🔍 ابحث عن اسم المجاهد هنا...">
+
+        <div class="controls">
+            <input type="text" id="newName" placeholder="الاسم الكامل">
+            <input type="text" id="newRank" placeholder="الصنف / الرتبة">
+            <input type="text" id="newOffice" placeholder="المكتب / التشكيل">
+            <button class="btn-add" onclick="addPerson()">+ إضافة وحفظ دائم</button>
+        </div>
+
+        <table id="mainTable">
+            <thead>
+                <tr>
+                    <th>الاسم الكامل</th>
+                    <th>الصنف</th>
+                    <th>المكتب / الجهة</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+        
+        <p style="margin-top: 30px; font-size: 12px; color: #777;">نظام الإدارة المركزية - ميسان | 2026</p>
     </div>
-
-    <table id="mainTable">
-        <thead>
-            <tr>
-                <th>الاسم الكامل</th>
-                <th>الصنف</th>
-                <th>المكتب</th>
-                <th>الإجراء</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>منتظر حميد شاطي</td>
-                <td>آمر نظام</td>
-                <td>مكتب ميسان</td>
-                <td><button class="btn-print" onclick="printTakhwil('منتظر حامد شاطي','آمر نظام','مكتب ميسان')">إصدار تخويل</button></td>
-            </tr>
-        </tbody>
-    </table>
-</div>
 
 </body>
 </html>
