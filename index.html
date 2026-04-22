@@ -2,88 +2,410 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>نظام الاستعلام الأمني المتطور - مديرية مرور ميسان</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الاستعلام عن القرص الكمركي - محافظة ميسان</title>
     <style>
-        :root { --main-color: #1a237e; --accent-color: #c62828; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f3; margin: 0; padding: 20px; }
-        .dashboard { max-width: 1000px; margin: auto; background: white; border-top: 5px solid var(--main-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 30px; }
-        header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 25px; padding-bottom: 10px; }
-        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-        .form-group { display: flex; flex-direction: column; }
-        label { font-weight: bold; margin-bottom: 8px; color: #333; }
-        select, input { padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
-        .full-width { grid-column: span 2; }
-        .btn-search { background: var(--main-color); color: white; border: none; padding: 15px; border-radius: 5px; cursor: pointer; font-size: 18px; transition: 0.3s; margin-top: 20px; }
-        .btn-search:hover { background: #0d1440; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .status-badge { display: inline-block; padding: 5px 10px; border-radius: 4px; font-size: 12px; background: #4caf50; color: white; margin-top: 10px; }
+        :root {
+            --police-blue: #1a237e;
+            --paper-bg: #fdfdfd;
+            --stamp-pink: #c2185b;
+            --ink-black: #212121;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif; /* لتقليد فونت الوثائق الرسمية */
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            color: var(--ink-black);
+        }
+
+        /* تنسيق قسم البحث */
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--police-blue);
+            text-align: center;
+        }
+
+        h1 { color: var(--police-blue); margin-top: 0; font-size: 24px; }
+        .subtitle { color: #666; margin-bottom: 20px; display: block; }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 18px;
+            font-family: monospace; /* لعرض رقم الشاصي بشكل واضح */
+            text-transform: uppercase;
+        }
+
+        input[type="text"]:focus { outline: none; border-color: var(--police-blue); }
+
+        .btn-search {
+            padding: 15px 30px;
+            background-color: var(--police-blue);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-search:hover { background-color: #0d1440; }
+
+        /* تنسيق الوثيقة الكمركية الرقمية (Simulation of image_0.png) */
+        .document-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--paper-bg);
+            padding: 50px;
+            border-radius: 2px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.15);
+            display: none; /* مخفية حتى يتم البحث */
+            position: relative;
+            min-height: 800px;
+            overflow: hidden;
+        }
+
+        /* خلفية مائية وهمية (Watermark) */
+        .document-container::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 100px;
+            color: rgba(0,0,0,0.03);
+            white-space: nowrap;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        /* الهيدر (Topsheet) */
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .header-left { text-align: left; font-size: 12px; }
+        .header-center { text-align: center; }
+        .header-right { text-align: right; }
+
+        .logo-placeholder {
+            width: 70px;
+            height: 70px;
+            border: 1px dashed #ccc;
+            margin: 0 auto 10px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            font-size: 10px;
+        }
+
+        .doc-title {
+            font-size: 20px;
+            font-weight: bold;
+            text-decoration: underline;
+            margin-top: 10px;
+        }
+
+        .ref-date-box {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: right;
+            font-size: 14px;
+        }
+
+        /* جسم الوثيقة (Data fields) */
+        .doc-body {
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .data-row {
+            display: flex;
+            margin-bottom: 12px;
+        }
+
+        .label {
+            width: 200px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .value {
+            flex-grow: 1;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .value-box {
+            border: 1px solid #ccc;
+            padding: 2px 10px;
+            display: inline-block;
+            font-family: monospace;
+            background: rgba(0,0,0,0.02);
+        }
+
+        /* محاكاة الاختام والتواقيع (الموجودة في image_0.png) */
+        .stamp-container {
+            position: absolute;
+            bottom: 60px;
+            right: 60px;
+            text-align: center;
+        }
+
+        .round-stamp {
+            width: 120px;
+            height: 120px;
+            border: 4px double var(--stamp-pink);
+            border-radius: 50%;
+            color: var(--stamp-pink);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            transform: rotate(-10deg);
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .signature {
+            font-style: italic;
+            font-size: 18px;
+            color: #333;
+            margin-top: 10px;
+            display: block;
+        }
+
+        /* الأزرار بعد العرض */
+        .action-buttons {
+            max-width: 900px;
+            margin: 20px auto;
+            text-align: center;
+            display: none;
+        }
+        
+        .btn-secondary {
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+
+        /* التحريك عند التحميل */
+        @keyframes loading-bar {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            flex-direction: column;
+        }
+        
+        .progress-bar {
+            width: 300px; height: 10px; background: #ddd; border-radius: 5px; margin-top: 15px; overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%; background: var(--police-blue); width: 0%;
+        }
+
     </style>
 </head>
 <body>
 
-<div class="dashboard">
-    <header>
-        <h2>نظام إدارة بيانات المركبات والاستعلام الاستخباراتي</h2>
-        <p>محافظة ميسان - المكتب الأمني</p>
-    </header>
-
-    <div class="grid-container">
-        <div class="form-group">
-            <label>القاطع / المنطقة (العمارة)</label>
-            <select id="region">
-                <option>مركز المدينة</option>
-                <option>قضاء المجر الكبير</option>
-                <option>قضاء الميمونة</option>
-                <option>قضاء قلعة صالح</option>
-                <option>قضاء علي الغربي</option>
-                <option>ناحية المشرح</option>
-            </select>
+    <div class="search-container">
+        <div class="header-right" style="text-align: right; font-size: 12px; color: #777; margin-bottom: 10px;">
+            جمهورية العراق<br> وزارة الداخلية<br> مديرية مرور محافظة ميسان
         </div>
-
-        <div class="form-group">
-            <label>رقم اللوحة</label>
-            <input type="text" placeholder="مثال: 123456">
+        <h1>نظام التدقيق الأمني الموحد للمركبات</h1>
+        <span class="subtitle">استعلام فوري عن البيانات الكمركية (القرص) عبر رقم الشاصي</span>
+        
+        <div class="search-box">
+            <input type="text" id="vin_input" placeholder="أدخل رقم الشاصي بالكامل (VIN)..." maxlength="17" value="L82PCM3A0S1214789"> <button class="btn-search" onclick="simulateSearch()">استعلام</button>
         </div>
-
-        <div class="form-group">
-            <label>فصيلة الدم</label>
-            <select>
-                <option>A+</option>
-                <option>A-</option>
-                <option>B+</option>
-                <option>B-</option>
-                <option>O+</option>
-                <option>O-</option>
-                <option>AB+</option>
-                <option>AB-</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>المواليد</label>
-            <input type="date">
-        </div>
-
-        <div class="form-group full-width">
-            <label>رفع بيانات من ملف نصي (Bulk Import)</label>
-            <input type="file" accept=".txt">
-        </div>
-
-        <button class="btn-search full-width">استعلام ذكي مدعوم بالذكاء الاصطناعي</button>
     </div>
 
-    <div id="results" style="margin-top: 30px; display: none; border-top: 2px solid #eee; padding-top: 20px;">
-        <h3>نتائج الاستعلام الأمني:</h3>
-        <p><strong>حالة المركبة:</strong> <span class="status-badge">سليمة - لا يوجد حجز</span></p>
-        <p><strong>القيود الجنائية:</strong> لا توجد ملاحظات استخباراتية حالياً.</p>
+    <div class="loading-overlay" id="loading_scr">
+        <span>جاري الاتصال بقاعدة بيانات الكمرك العامة...</span>
+        <div class="progress-bar"><div class="progress-fill" id="progress_fill"></div></div>
     </div>
-</div>
 
-<script>
-    document.querySelector('.btn-search').addEventListener('click', function() {
-        alert('جاري الاتصال بقاعدة بيانات المرور العامة... يرجى الانتظار');
-        document.getElementById('results').style.display = 'block';
-    });
-</script>
+    <div class="document-container" id="result_doc">
+        
+        <div class="doc-header">
+            <div class="header-right">
+                <div>جمهورية العراق</div>
+                <div>وزارة المالية</div>
+                <div>الهيئة العامة للكمارك</div>
+                <div style="font-weight: bold; font-size: 14px; margin-top: 5px;">مديرية كمرك المنطقة الوسطى</div>
+                <div style="font-size: 12px; color: #555;">(محاكاة للنظام الورقي)</div>
+            </div>
+            
+            <div class="header-center">
+                <div class="logo-placeholder">شعار الهيئة<br>(وهمي)</div>
+                <div class="doc-title">كتاب تسريع (تفتيش مركبة)</div>
+            </div>
+            
+            <div class="header-left">
+                Republic of Iraq<br>
+                Ministry Of Finance<br>
+                General Commission for Customs
+            </div>
+        </div>
+
+        <div style="text-align: left; margin-bottom: 20px;">
+            <div class="ref-date-box">
+                الرقم: 2107144018849 (وهمي)<br>
+                التاريخ: 2025/11/15
+            </div>
+        </div>
+
+        <div class="doc-body">
+            <p style="text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 25px;">
+                إلى / مديرية المرور العامة / مديرية مرور ميسان
+            </p>
+            
+            <p style="text-indent: 20px; margin-bottom: 30px;">
+                م/ البيانات الفنية للمركبة (القرص الكمركي). أدناه البيانات التي تم تدقيقها والمثبتة في قاعدة بياناتنا للمركبة ذات المواصفات التالية:
+            </p>
+
+            <div class="data-row">
+                <div class="label">نوع المركبة:</div>
+                <div class="value">صالون</div>
+            </div>
+            
+            <div class="data-row">
+                <div class="label">صنف المركبة:</div>
+                <div class="value">خصوصي</div>
+            </div>
+
+            <div class="data-row">
+                <div class="label">رقم الشاصي (VIN):</div>
+                <div class="value"><span class="value-box" id="doc_vin_value">XXXXXXXX</span></div>
+            </div>
+            
+            <div class="data-row">
+                <div class="label">سنة الصنع:</div>
+                <div class="value">2025</div>
+            </div>
+
+            <div class="data-row">
+                <div class="label">الحمولة (طن):</div>
+                <div class="value">5</div>
+            </div>
+            
+            <div class="data-row">
+                <div class="label">لون المركبة:</div>
+                <div class="value">أبيض</div>
+            </div>
+            
+            <div class="data-row">
+                <div class="label">الجهة المستوردة:</div>
+                <div class="value">شركة التجارة العامة والخدمات</div>
+            </div>
+            
+            <p style="margin-top: 40px; text-align: justify; border-top: 1px solid #eee; padding-top: 10px;">
+                ملاحظات: هذه البيانات مستخرجة من قاعدة بيانات الكمرك العامة وهي دقيقة حسب السجلات الرسمية بتاريخ اليوم. يرجى اعتمادها لتكملة معاملات تسجيل المركبة في قواطع مرور محافظة ميسان.
+            </p>
+
+        </div>
+
+        <div class="stamp-container">
+            <div class="round-stamp">
+                <div>الجمهورية العراقية</div>
+                <div>الهيئة العامة للكمارك</div>
+                <div>تصديق البيانات</div>
+                <div style="font-size: 8px;">(وهمي لأغراض العرض)</div>
+            </div>
+            <span style="font-size: 12px; color: #777;">توقيع المخول:</span>
+            <span class="signature">عماد جاسم / قسم الأقراص</span>
+        </div>
+    </div>
+
+    <div class="action-buttons" id="action_btns">
+        <button class="btn-secondary" onclick="window.print()">طباعة الوثيقة</button>
+        <button class="btn-secondary" style="background-color: #dc3545;" onclick="resetSearch()">استعلام جديد</button>
+    </div>
+
+    <script>
+        // دالة محاكاة البحث
+        function simulateSearch() {
+            var vin = document.getElementById('vin_input').value.trim();
+            
+            if (vin === "") {
+                alert("يرجى إدخال رقم الشاصي أولاً.");
+                return;
+            }
+
+            // إظهار طبقة التحميل
+            document.getElementById('loading_scr').style.display = 'flex';
+            document.getElementById('progress_fill').style.animation = 'loading-bar 1.8s linear forwards';
+
+            // بعد انتهاء وقت التحميل الوهمي (1.8 ثانية)
+            setTimeout(function() {
+                // إخفاء التحميل
+                document.getElementById('loading_scr').style.display = 'none';
+                document.getElementById('progress_fill').style.animation = 'none';
+                
+                // تحديث القيمة في الوثيقة الرقمية
+                document.getElementById('doc_vin_value').innerText = vin.toUpperCase();
+                
+                // إظهار الوثيقة وأزرار الإجراءات
+                document.getElementById('result_doc').style.display = 'block';
+                document.getElementById('action_btns').style.display = 'block';
+                
+                // النزول تلقائياً للوثيقة
+                window.scrollTo({ top: document.getElementById('result_doc').offsetTop, behavior: 'smooth' });
+                
+            }, 1800);
+        }
+
+        // دالة تصفير البحث
+        function resetSearch() {
+            document.getElementById('result_doc').style.display = 'none';
+            document.getElementById('action_btns').style.display = 'none';
+            document.getElementById('vin_input').value = "";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
 
 </body>
 </html>
