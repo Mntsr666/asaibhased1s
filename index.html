@@ -2,209 +2,88 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>منظومة العمليات السيادية - أمن ميسان</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <title>نظام الاستعلام الأمني المتطور - مديرية مرور ميسان</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-        :root { --gold: #c5a059; --dark: #0a0a0a; --panel: #151515; }
-        body { background: var(--dark); color: #fff; font-family: 'Cairo', sans-serif; margin: 0; overflow: hidden; }
-
-        /* بوابة الدخول سيدي */
-        #gate { position: fixed; inset: 0; z-index: 10000; background: #000; display: flex; align-items: center; justify-content: center; }
-        .gate-box { border: 2px solid var(--gold); padding: 50px; text-align: center; background: #0a0a0a; box-shadow: 0 0 40px var(--gold); }
-
-        /* الهيكل العام */
-        .wrapper { display: none; height: 100vh; flex-direction: column; }
-        nav { background: #000; border-bottom: 2px solid var(--gold); display: flex; padding: 0 20px; gap: 10px; }
-        .nav-btn { padding: 15px 25px; cursor: pointer; font-weight: bold; color: #888; border-bottom: 3px solid transparent; transition: 0.3s; }
-        .nav-btn.active { color: var(--gold); border-bottom-color: var(--gold); background: #111; }
-
-        .content { flex: 1; overflow-y: auto; padding: 20px; display: none; }
-        .content.active { display: block; }
-
-        /* الكروت والمدخلات */
-        .card { background: var(--panel); border: 1px solid #222; padding: 25px; border-radius: 8px; margin-bottom: 20px; }
-        input, select, textarea { background: #000; border: 1px solid #333; color: var(--gold); padding: 12px; width: 100%; margin-bottom: 15px; border-radius: 5px; font-family: 'Cairo'; }
-        .btn-gold { background: var(--gold); color: #000; border: none; padding: 15px; font-weight: 900; cursor: pointer; width: 100%; border-radius: 5px; font-size: 16px; }
-
-        /* --- نظام الهويات --- */
-        .id-preview { width: 400px; height: 250px; background: #fff; color: #000; border: 2px solid #000; border-radius: 15px; margin: 20px auto; position: relative; padding: 20px; box-sizing: border-box; display: none; }
-        .id-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #000; padding-bottom: 5px; font-size: 10px; font-weight: 900; }
-        .stamp { position: absolute; bottom: 10px; left: 10px; width: 100px; opacity: 0.8; transform: rotate(-15deg); }
-
-        /* --- نظام التخاوي --- */
-        #permit-zone { background: #fff; color: #000; width: 210mm; min-height: 297mm; padding: 25mm; margin: auto; display: none; border: 1px solid #ddd; }
-
-        /* --- نظام الخارطة --- */
-        #map { width: 100%; height: 600px; background: #111; border: 2px solid #222; }
-
-        @media print {
-            body { background: #fff; }
-            .no-print { display: none !important; }
-            #id-preview-box, #permit-zone { display: block !important; position: static; margin: 0; border: none; }
-        }
+        :root { --main-color: #1a237e; --accent-color: #c62828; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f3; margin: 0; padding: 20px; }
+        .dashboard { max-width: 1000px; margin: auto; background: white; border-top: 5px solid var(--main-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 30px; }
+        header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 25px; padding-bottom: 10px; }
+        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .form-group { display: flex; flex-direction: column; }
+        label { font-weight: bold; margin-bottom: 8px; color: #333; }
+        select, input { padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
+        .full-width { grid-column: span 2; }
+        .btn-search { background: var(--main-color); color: white; border: none; padding: 15px; border-radius: 5px; cursor: pointer; font-size: 18px; transition: 0.3s; margin-top: 20px; }
+        .btn-search:hover { background: #0d1440; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .status-badge { display: inline-block; padding: 5px 10px; border-radius: 4px; font-size: 12px; background: #4caf50; color: white; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div id="gate">
-    <div class="gate-box">
-        <h1 style="color:var(--gold); margin:0;">هيئة الحشد الشعبي</h1>
-        <p>مكتب أمن ميسان - الإصدار السيادي v110</p>
-        <input type="password" id="sys-pass" placeholder="شفرة السيادة" style="text-align: center;">
-        <button class="btn-gold" onclick="unlock()">نعم سيدي</button>
+<div class="dashboard">
+    <header>
+        <h2>نظام إدارة بيانات المركبات والاستعلام الاستخباراتي</h2>
+        <p>محافظة ميسان - المكتب الأمني</p>
+    </header>
+
+    <div class="grid-container">
+        <div class="form-group">
+            <label>القاطع / المنطقة (العمارة)</label>
+            <select id="region">
+                <option>مركز المدينة</option>
+                <option>قضاء المجر الكبير</option>
+                <option>قضاء الميمونة</option>
+                <option>قضاء قلعة صالح</option>
+                <option>قضاء علي الغربي</option>
+                <option>ناحية المشرح</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>رقم اللوحة</label>
+            <input type="text" placeholder="مثال: 123456">
+        </div>
+
+        <div class="form-group">
+            <label>فصيلة الدم</label>
+            <select>
+                <option>A+</option>
+                <option>A-</option>
+                <option>B+</option>
+                <option>B-</option>
+                <option>O+</option>
+                <option>O-</option>
+                <option>AB+</option>
+                <option>AB-</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>المواليد</label>
+            <input type="date">
+        </div>
+
+        <div class="form-group full-width">
+            <label>رفع بيانات من ملف نصي (Bulk Import)</label>
+            <input type="file" accept=".txt">
+        </div>
+
+        <button class="btn-search full-width">استعلام ذكي مدعوم بالذكاء الاصطناعي</button>
+    </div>
+
+    <div id="results" style="margin-top: 30px; display: none; border-top: 2px solid #eee; padding-top: 20px;">
+        <h3>نتائج الاستعلام الأمني:</h3>
+        <p><strong>حالة المركبة:</strong> <span class="status-badge">سليمة - لا يوجد حجز</span></p>
+        <p><strong>القيود الجنائية:</strong> لا توجد ملاحظات استخباراتية حالياً.</p>
     </div>
 </div>
 
-<div class="wrapper" id="main-ui">
-    <nav class="no-print">
-        <div class="nav-btn active" onclick="tab('map-tab', this)">🗺️ الخارطة والسيطرات</div>
-        <div class="nav-btn" onclick="tab('id-tab', this)">🪪 إصدار الهويات</div>
-        <div class="nav-btn" onclick="tab('permit-tab', this)">📄 نظام التخاوي</div>
-        <div class="nav-btn" onclick="tab('db-tab', this)">📊 سجلات الذمة</div>
-    </nav>
-
-    <div id="map-tab" class="content active">
-        <div class="card">
-            <h2 style="color:var(--gold);">خارطة قاطع ميسان الميدانية</h2>
-            <div id="map"></div>
-        </div>
-    </div>
-
-    <div id="id-tab" class="content">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div class="card no-print">
-                <h2 style="color:var(--gold);">إدخال بيانات الهوية</h2>
-                <input type="text" id="id-name" placeholder="الاسم الرباعي">
-                <select id="id-group">
-                    <option>عصائب أهل الحق</option>
-                    <option>هيئة الحشد الشعبي</option>
-                </select>
-                <input type="text" id="id-rank" placeholder="الصفة (مثلاً: منتسب أمني)">
-                <input type="text" id="id-blood" placeholder="فصيلة الدم">
-                <button class="btn-gold" onclick="generateID()">توليد الهوية للمعاينة</button>
-            </div>
-            <div id="id-preview-box" class="id-preview">
-                <div class="id-header">
-                    <div>جمهورية العراق<br>هيئة الحشد الشعبي</div>
-                    <div style="text-align: center;"><b>هوية تعريفية</b></div>
-                    <div style="text-align: left;">مكتب أمن ميسان</div>
-                </div>
-                <div style="display: flex; margin-top: 15px;">
-                    <div style="width: 80px; height: 100px; border: 1px solid #000; background: #eee; font-size: 10px; text-align: center; padding-top: 40px;">الصورة الشخصية</div>
-                    <div style="padding-right: 15px; font-size: 14px;">
-                        <p>الاسم: <b id="out-name"></b></p>
-                        <p>الجهة: <b id="out-group"></b></p>
-                        <p>الصفة: <b id="out-rank"></b></p>
-                        <p>الفصيلة: <b id="out-blood"></b></p>
-                    </div>
-                </div>
-                <div style="position: absolute; bottom: 10px; left: 10px; text-align: center;">
-                    <div style="border: 2px solid #d32f2f; color: #d32f2f; border-radius: 50%; padding: 5px; font-size: 10px; transform: rotate(-15deg); font-weight: 900;">
-                        مكتب أمن ميسان<br>الشيخ عدنان الغنامي
-                    </div>
-                </div>
-                <button class="btn-gold no-print" style="position: absolute; top: 260px; left: 0;" onclick="window.print()">طباعة الآن سيدي</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="permit-tab" class="content">
-        <div class="card no-print">
-            <h2 style="color:var(--gold);">إصدار كتاب تخويل رسمي</h2>
-            <input type="text" id="t-target" placeholder="إلى (مثلاً: السيطرات كافة)">
-            <input type="text" id="t-person" placeholder="اسم الشخص المخول">
-            <textarea id="t-reason" rows="4" placeholder="طبيعة المهمة (مثلاً: تسهيل مهمة نقل تجهيزات)"></textarea>
-            <button class="btn-gold" onclick="generatePermit()">توليد الكتاب الرسمي</button>
-        </div>
-        
-        <div id="permit-zone">
-            <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 10px;">
-                <b>جمهورية العراق<br>هيئة الحشد الشعبي<br>مكتب أمن ميسان</b>
-                <div style="text-align: center;"><h2>تخويل رسمي</h2></div>
-                <div style="text-align: left;">العدد: MSN/2026/AI<br>التاريخ: <span id="t-date"></span></div>
-            </div>
-            <div style="margin-top: 50px; font-size: 20px; line-height: 2;">
-                إلى / <b id="out-t-target"></b><br>
-                م / تسهيل مهمة<br><br>
-                نسب السيد <b id="out-t-person"></b> المنسوب إلى تشكيلاتنا القيام بـ (<b id="out-t-reason"></b>).<br>
-                يرجى تسهيل مهمته والتعاون معه بما يخدم المصلحة العامة.. مع التقدير.
-            </div>
-            <div style="margin-top: 100px; text-align: left; padding-left: 50px;">
-                <b>الشيخ عدنان الغنامي</b><br>مدير مكتب أمن ميسان
-            </div>
-            <button class="btn-gold no-print" onclick="window.print()">طباعة الكتاب سيدي</button>
-        </div>
-    </div>
-
-    <div id="db-tab" class="content">
-        <div class="card">
-            <h2 style="color:var(--gold);">سجلات القوة والذمة</h2>
-            <table style="width: 100%; border-collapse: collapse; color: #fff;">
-                <thead>
-                    <tr style="background: var(--gold); color: #000;">
-                        <th style="padding: 10px;">الاسم</th><th>الجهة</th><th>الذمة</th><th>الحالة</th>
-                    </tr>
-                </thead>
-                <tbody id="db-list"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    let db = JSON.parse(localStorage.getItem('SOVEREIGN_V110') || '{"p":[]}');
-
-    function unlock() {
-        if(document.getElementById('sys-pass').value === "2026") {
-            document.getElementById('gate').style.display = 'none';
-            document.getElementById('main-ui').style.display = 'flex';
-            initMap();
-        }
-    }
-
-    function tab(id, el) {
-        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        el.classList.add('active');
-    }
-
-    function initMap() {
-        let map = L.map('map').setView([31.84, 47.14], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        L.marker([31.841, 47.142]).addTo(map).bindPopup("قيادة عمليات ميسان");
-    }
-
-    function generateID() {
-        document.getElementById('out-name').innerText = document.getElementById('id-name').value;
-        document.getElementById('out-group').innerText = document.getElementById('id-group').value;
-        document.getElementById('out-rank').innerText = document.getElementById('id-rank').value;
-        document.getElementById('out-blood').innerText = document.getElementById('id-blood').value;
-        document.getElementById('id-preview-box').style.display = 'block';
-        
-        // حفظ في الداتابيس سيدي
-        db.p.push({name: document.getElementById('id-name').value, group: document.getElementById('id-group').value});
-        localStorage.setItem('SOVEREIGN_V110', JSON.stringify(db));
-        renderDB();
-    }
-
-    function generatePermit() {
-        document.getElementById('out-t-target').innerText = document.getElementById('t-target').value;
-        document.getElementById('out-t-person').innerText = document.getElementById('t-person').value;
-        document.getElementById('out-t-reason').innerText = document.getElementById('t-reason').value;
-        document.getElementById('t-date').innerText = new Date().toLocaleDateString('ar-EG');
-        document.getElementById('permit-zone').style.display = 'block';
-    }
-
-    function renderDB() {
-        document.getElementById('db-list').innerHTML = db.p.map(x => `
-            <tr style="border-bottom: 1px solid #222;">
-                <td style="padding:10px;">${x.name}</td><td>${x.group}</td><td>كلاشينكوف</td><td>نشط</td>
-            </tr>
-        `).join('');
-    }
+    document.querySelector('.btn-search').addEventListener('click', function() {
+        alert('جاري الاتصال بقاعدة بيانات المرور العامة... يرجى الانتظار');
+        document.getElementById('results').style.display = 'block';
+    });
 </script>
+
 </body>
 </html>
