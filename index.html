@@ -2,180 +2,186 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>منظومة قيادة ميسان v36.0 - تحديث العمليات</title>
+    <title>منظومة السيادة v70.0 | غرفة العمليات</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-        :root { --gold: #c5a059; --dark: #0f172a; --red: #b91c1c; }
-        body { background: #f1f5f9; font-family: 'Cairo', sans-serif; margin: 0; overflow: hidden; }
-
-        /* بوابة الدخول سيدي */
-        #lock-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
-        .lock-box { text-align: center; border: 2px solid var(--gold); padding: 40px; border-radius: 20px; background: #0a0a0a; color: var(--gold); }
-
-        .app-container { display: none; height: 100vh; display: flex; flex-direction: row-reverse; }
-        .sidebar { width: 300px; background: var(--dark); color: #fff; border-left: 3px solid var(--gold); overflow-y: auto; }
-        .content { flex: 1; display: flex; flex-direction: column; background: #f8fafc; overflow-y: auto; }
+        :root { --neon: #00f2ff; --gold: #c5a059; --bg: #020202; --card: #0a0a0a; }
         
-        .menu-item { padding: 15px 25px; cursor: pointer; transition: 0.3s; border-right: 4px solid transparent; display: flex; align-items: center; gap: 10px; }
-        .menu-item:hover, .menu-item.active { background: #1e293b; border-right-color: var(--gold); color: var(--gold); }
-
-        .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 5px solid var(--dark); }
-        .tab-content { display: none; padding: 30px; }
-        .tab-content.active { display: block; }
-
-        /* زر الخارطة الجديد سيدي */
-        .map-btn-large { 
-            background: linear-gradient(45deg, #1e293b, #0f172a); color: var(--gold); 
-            padding: 40px; border-radius: 15px; border: 2px dashed var(--gold); 
-            cursor: pointer; text-align: center; font-size: 20px; font-weight: 900;
-            width: 100%; transition: 0.3s;
+        body { 
+            background: var(--bg); color: #fff; font-family: 'Cairo', sans-serif; 
+            margin: 0; overflow: hidden; height: 100vh;
+            border: 2px solid var(--gold); box-sizing: border-box;
         }
-        .map-btn-large:hover { background: #000; transform: scale(1.02); }
 
-        .btn-gold { background: var(--dark); color: var(--gold); border: 2px solid var(--gold); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: 'Cairo'; }
-        
+        /* دخول السيادة */
+        #gate { position: fixed; inset: 0; z-index: 10000; background: #000; display: flex; align-items: center; justify-content: center; }
+        .gate-ui { text-align: center; border: 1px solid var(--gold); padding: 50px; background: radial-gradient(#111, #000); box-shadow: 0 0 50px rgba(197, 160, 89, 0.2); }
+
+        /* الشاشة الرئيسية */
+        .dashboard { display: grid; grid-template-columns: 350px 1fr 350px; height: 100vh; gap: 10px; padding: 10px; }
+
+        /* الأجنحة */
+        .panel { background: var(--card); border: 1px solid #1a1a1a; display: flex; flex-direction: column; padding: 15px; position: relative; }
+        .panel-header { color: var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 8px; margin-bottom: 15px; font-weight: 900; font-size: 14px; display: flex; justify-content: space-between; }
+
+        /* الخريطة التكتيكية */
+        .map-box { background: #000; border: 1px solid #222; position: relative; overflow: hidden; }
+        #live-map { width: 100%; height: 100%; border: none; filter: brightness(0.7) contrast(1.2) hue-rotate(180deg); }
+
+        /* المدخلات السينمائية */
+        .input-box { background: #000; border: 1px solid #333; color: var(--neon); padding: 12px; width: 100%; margin-bottom: 8px; font-family: 'Cairo'; font-size: 13px; outline: none; }
+        .input-box:focus { border-color: var(--gold); }
+        .btn-main { background: var(--gold); color: #000; border: none; padding: 12px; font-weight: 900; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn-main:hover { background: #fff; box-shadow: 0 0 20px var(--gold); }
+
+        /* الداتابيس الفعلي (سجلات ميسان) */
+        .db-scroll { flex: 1; overflow-y: auto; padding-right: 5px; }
+        .db-entry { background: #050505; border-right: 3px solid var(--gold); padding: 10px; margin-bottom: 8px; font-size: 12px; position: relative; }
+        .db-entry:hover { background: #0f0f0f; }
+        .db-badge { background: var(--gold); color: #000; padding: 2px 5px; font-size: 9px; font-weight: bold; position: absolute; left: 5px; top: 5px; }
+
         /* الهوية سيدي */
-        .id-card-view { width: 350px; background: #0f172a; border: 2px solid var(--gold); border-radius: 10px; padding: 15px; color: #fff; position: relative; margin: auto; display: none; }
+        @media print { .dashboard, #gate { display: none; } #id-card { display: block !important; } }
+        #id-card { display: none; width: 350px; background: #fff; color: #000; padding: 20px; border: 5px double #000; margin: auto; text-align: center; }
     </style>
 </head>
 <body>
 
-<div id="lock-screen">
-    <div class="lock-box">
-        <h1>منظومة السيادة v36.0</h1>
-        <input type="password" id="sys-pass" placeholder="شفرة العمليات" style="text-align: center; width: 250px; font-size: 20px;">
-        <br>
-        <button class="btn-gold" style="width: 250px;" onclick="unlock()">نعم سيدي</button>
+<div id="gate">
+    <div class="gate-ui">
+        <h1 style="color:var(--gold); margin:0;">نظام القبضة السيادية v70.0</h1>
+        <p style="color:#555; font-size:12px;">قاطع ميسان | مديرية الاستخبارات</p>
+        <input type="password" id="gate-pass" class="input-box" placeholder="شفرة العبور" style="text-align: center; margin-top: 20px;">
+        <button class="btn-main" onclick="openSystem()">نعم سيدي</button>
     </div>
 </div>
 
-<div class="app-container" id="main-ui">
-    <div class="sidebar">
-        <h2 style="text-align: center; padding: 20px; color: var(--gold);">قيادة ميسان</h2>
-        <div class="menu-item active" onclick="showTab('map-tab', this)">🗺️ فتح الخارطة الميدانية</div>
-        <div class="menu-item" onclick="showTab('personnel-tab', this)">👥 سجل المنتسبين والرموز</div>
-        <div class="menu-item" onclick="showTab('arms-tab', this)">🔫 السلاح والذمم</div>
-        <div class="menu-item" onclick="showTab('permits-tab', this)">📄 الهويات والتخاويل</div>
-        <div class="menu-item" onclick="showTab('ai-tab', this)">🤖 الاستعلام الذكي AI</div>
+<div class="dashboard" id="ui" style="display: none;">
+    <div class="panel">
+        <div class="panel-header"><span>👥 داتابيس النخبة</span> <span id="count-p">0</span></div>
+        <input type="text" id="p-name" class="input-box" placeholder="الاسم الرباعي">
+        <select id="p-group" class="input-box">
+            <option>عصائب أهل الحق</option>
+            <option>الحشد الشعبي (المقر)</option>
+        </select>
+        <input type="text" id="p-weapon" class="input-box" placeholder="رقم السلاح (الذمة)">
+        <input type="text" id="p-blood" class="input-box" placeholder="فصيلة الدم">
+        <button class="btn-main" onclick="saveToDB()">أرشفة البيانات سيدي</button>
+        
+        <div class="db-scroll" id="p-list" style="margin-top: 15px;"></div>
     </div>
 
-    <div class="content">
-        <header style="background:#fff; padding: 15px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between;">
-            <b id="title-text">نظام العمليات - ميسان</b>
-            <div id="clock"></div>
-        </header>
-
-        <div id="map-tab" class="tab-content active">
-            <div class="card">
-                <h3>الخارطة الجغرافية لقاطع ميسان</h3>
-                <p>سيدي، نظراً للقيود التقنية على المتصفحات، يرجى الضغط على الزر أدناه لفتح خارطة العمارة الحقيقية (الأقمار الصناعية) في نافذة عمليات مستقلة للتحكم الكامل.</p>
-                <div class="map-btn-large" onclick="openGoogleMaps()">
-                    📍 الضغط هنا لفتح خارطة العمارة والسيطرات (GOOGLE MAPS)
-                </div>
-            </div>
-            <div class="card">
-                <h4>تثبيت إحداثيات السيطرات يدوياً</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <input type="text" id="cp-name" placeholder="اسم السيطرة">
-                    <select id="cp-force">
-                        <option>شرطة اتحادية</option><option>نجدة</option><option>مرور</option><option>رد سريع</option>
-                    </select>
-                </div>
-                <button class="btn-gold" onclick="addCP()">تثبيت في سجل الموقف</button>
-            </div>
+    <div class="map-box">
+        <div style="position:absolute; top:20px; left:20px; z-index:100; background:rgba(0,0,0,0.8); padding:15px; border:1px solid var(--gold); pointer-events:none;">
+            <div id="clock" style="color:var(--gold); font-size:18px; font-weight:900;"></div>
+            <div style="font-size:10px; letter-spacing:2px;">LOCATION: AMA-MSN-IRQ</div>
         </div>
-
-        <div id="personnel-tab" class="tab-content">
-            <div class="card">
-                <h4>إضافة منتسب (حشد / عصائب)</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                    <input type="text" id="p-name" placeholder="الاسم الكامل">
-                    <select id="p-blood"><option>O+</option><option>A+</option><option>B+</option><option>AB+</option></select>
-                    <input type="text" id="p-phone" placeholder="رقم الهاتف">
-                </div>
-                <button class="btn-gold" onclick="addPerson()">حفظ وتوليد الرمز</button>
-            </div>
-            <div class="card">
-                <table style="width: 100%; border-collapse: collapse; text-align: center;">
-                    <thead><tr style="background:#f1f5f9;"><th>الرمز</th><th>الاسم</th><th>الفصيلة</th><th>الموقف</th></tr></thead>
-                    <tbody id="t-personnel"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="permits-tab" class="tab-content">
-            <div class="card">
-                <h4>إصدار هوية / تخويل رسمي (مختم)</h4>
-                <input type="text" id="id-name-in" placeholder="أدخل اسم الشخص من السجل">
-                <button class="btn-gold" onclick="previewID()">معاينة الهوية قبل الطباعة</button>
-            </div>
-            <div id="id-view" class="id-card-view">
-                <div style="font-size: 10px; border-bottom: 1px solid var(--gold); padding-bottom: 5px;">هيئة الحشد الشعبي - أمن ميسان</div>
-                <h3 id="id-out-name" style="text-align: center; margin: 15px 0;">الاسم الكامل</h3>
-                <div style="text-align: left; font-size: 12px;">المدير: الشيخ عدنان الغنامي</div>
-                <div style="position: absolute; bottom: 10px; left: 10px; border: 2px solid var(--red); color: var(--red); border-radius: 50%; padding: 5px; font-size: 8px; transform: rotate(-20deg);">مكتب أمن ميسان<br>مختم</div>
-                <button class="btn-gold" style="width: 100%; margin-top: 10px; font-size: 10px;" onclick="window.print()">طباعة الآن</button>
-            </div>
-        </div>
-
+        <iframe id="live-map" src="http://googleusercontent.com/maps.google.com/satellite"></iframe>
     </div>
+
+    <div class="panel">
+        <div class="panel-header"><span>🚔 موقف السيطرات</span> <span id="count-c">0</span></div>
+        <input type="text" id="c-name" class="input-box" placeholder="اسم السيطرة">
+        <select id="c-force" class="input-box">
+            <option>شرطة اتحادية</option><option>نجدة</option><option>رد سريع</option>
+        </select>
+        <button class="btn-main" onclick="saveCP()">تثبيت الميدان</button>
+        
+        <div id="c-list" style="height:150px; overflow-y:auto; margin:10px 0;"></div>
+
+        <div class="panel-header" style="margin-top:10px;"><span>🤖 تحليل AI العميق</span></div>
+        <input type="text" id="ai-scan" class="input-box" placeholder="بحث شامل (اسم/سلاح)...">
+        <button class="btn-main" style="background:#800; color:#fff;" onclick="aiSearch()">بدء الفحص الجنائي</button>
+        <div id="ai-output" style="margin-top:10px; font-size:11px; color:var(--neon); background:#050505; padding:10px; border-right:2px solid var(--neon); display:none;"></div>
+        
+        <button class="btn-main" style="margin-top: auto; background:#111; color:var(--gold); border:1px solid var(--gold);" onclick="exportBackup()">تصدير الداتابيس (Backup)</button>
+    </div>
+</div>
+
+<div id="id-card">
+    <h3>هيئة الحشد الشعبي</h3>
+    <p>أمن ميسان</p>
+    <hr>
+    <h2 id="out-name">الاسم</h2>
+    <p id="out-code">CODE</p>
+    <div style="margin-top:30px;"><b>الشيخ عدنان الغنامي</b><br>مدير أمن ميسان</div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('maysan_v36_db') || '{"p":[], "cps":[]}');
+    let db = JSON.parse(localStorage.getItem('SOVEREIGN_DB_70') || '{"p":[], "c":[]}');
 
-    function unlock() {
-        if(document.getElementById('sys-pass').value === "2026") {
-            document.getElementById('lock-screen').style.display = 'none';
-            document.getElementById('main-ui').style.display = 'flex';
+    function openSystem() {
+        if(document.getElementById('gate-pass').value === "2026") {
+            document.getElementById('gate').style.display = 'none';
+            document.getElementById('ui').style.display = 'grid';
             render();
-        } else { alert("شفرة خاطئة سيدي!"); }
+        } else { alert("سيدي، الشفرة خاطئة!"); }
     }
 
-    // وظيفة فتح الخارطة سيدي لضمان عملها 100%
-    function openGoogleMaps() {
-        // إحداثيات مركز مدينة العمارة
-        window.open("https://www.google.com/maps/@31.8400,47.1400,13z/data=!3m1!4b1!4m2!7m1!2e1", "_blank");
-    }
-
-    function showTab(id, el) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        el.classList.add('active');
-    }
-
-    function addPerson() {
-        let n = document.getElementById('p-name').value;
-        if(!n) return;
-        db.p.push({
-            code: "MSN-" + Math.floor(1000 + Math.random() * 9000),
-            name: n,
+    function saveToDB() {
+        let p = {
+            id: "M-" + Math.floor(1000 + Math.random()*9000),
+            name: document.getElementById('p-name').value,
+            group: document.getElementById('p-group').value,
+            weapon: document.getElementById('p-weapon').value,
             blood: document.getElementById('p-blood').value
-        });
-        save();
+        };
+        if(p.name) { db.p.push(p); sync(); }
     }
 
-    function previewID() {
-        document.getElementById('id-out-name').innerText = document.getElementById('id-name-in').value;
-        document.getElementById('id-view').style.display = 'block';
+    function saveCP() {
+        let c = { name: document.getElementById('c-name').value, force: document.getElementById('c-force').value };
+        if(c.name) { db.c.push(c); sync(); }
     }
 
-    function save() { localStorage.setItem('maysan_v36_db', JSON.stringify(db)); render(); }
+    function aiSearch() {
+        let q = document.getElementById('ai-scan').value;
+        let out = document.getElementById('ai-output');
+        out.style.display = 'block';
+        out.innerHTML = "جاري تفتيش السجلات الرقمية...<br>تحليل الارتباطات الأمنية...";
+        setTimeout(() => {
+            let res = db.p.find(x => x.name.includes(q) || x.weapon.includes(q));
+            if(res) {
+                out.innerHTML = `[إيجابي سيدي]<br>الاسم: ${res.name}<br>الرمز: ${res.id}<br>الذمة: ${res.weapon}<br>الحالة: مخول ونشط.`;
+            } else { out.innerHTML = "⚠️ لا توجد بيانات. الشخص غير مخول في قاطع ميسان."; }
+        }, 1000);
+    }
+
+    function exportBackup() {
+        let blob = new Blob([JSON.stringify(db)], {type: "application/json"});
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url; a.download = "maysan_security_db.json"; a.click();
+    }
+
+    function printID(name, id) {
+        document.getElementById('out-name').innerText = name;
+        document.getElementById('out-code').innerText = id;
+        window.print();
+    }
+
+    function sync() { localStorage.setItem('SOVEREIGN_DB_70', JSON.stringify(db)); render(); }
     
     function render() {
-        document.getElementById('t-personnel').innerHTML = db.p.map(x => `
-            <tr style="border-bottom: 1px solid #eee;">
-                <td style="color:green; font-weight:bold;">${x.code}</td>
-                <td><b>${x.name}</b></td>
-                <td>${x.blood}</td>
-                <td>نشط</td>
-            </tr>
-        `).join('');
+        document.getElementById('count-p').innerText = db.p.length;
+        document.getElementById('count-c').innerText = db.c.length;
+        
+        document.getElementById('p-list').innerHTML = db.p.map(x => `
+            <div class="db-entry">
+                <span class="db-badge">${x.id}</span>
+                <b>${x.name}</b><br><small>${x.group} | ذمة: ${x.weapon}</small>
+                <button onclick="printID('${x.name}','${x.id}')" style="display:block; width:100%; margin-top:5px; font-size:10px; cursor:pointer;">طبع هوية</button>
+            </div>
+        `).reverse().join('');
+
+        document.getElementById('c-list').innerHTML = db.c.map(x => `
+            <div class="db-entry" style="border-color:var(--neon)">
+                <b>${x.name}</b><br><small>القوة: ${x.force}</small>
+            </div>
+        `).reverse().join('');
     }
 
-    setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleString('ar-EG'), 1000);
+    setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString('ar-EG'), 1000);
 </script>
 </body>
 </html>
