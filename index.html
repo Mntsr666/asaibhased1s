@@ -2,275 +2,189 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CENTRAL INTELLIGENCE SYSTEM</title>
+    <title>نظام الأرشفة والاستيراد الجماعي المركزي</title>
     <style>
-        :root { --main-gold: #d4af37; --bg-black: #050505; --neon-text: #00ff41; --border-color: #222; }
+        :root { --gold: #d4af37; --bg: #050505; --green: #00ff41; }
+        body { background: var(--bg); color: var(--gold); font-family: 'Arial', sans-serif; margin: 0; padding: 10px; }
         
-        body { background-color: var(--bg-black); color: var(--main-gold); font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; }
+        #lock-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .lock-box { border: 2px solid var(--gold); padding: 35px; border-radius: 15px; text-align: center; background: #111; }
+        
+        .main-container { max-width: 1200px; margin: auto; border: 2px solid var(--gold); background: #111; border-radius: 10px; display: none; overflow: hidden; }
+        
+        header { background: #000; padding: 15px; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
+        .logo img { width: 80px; filter: drop-shadow(0 0 5px var(--gold)); }
 
-        /* شاشة التحميل الاستخباراتية */
-        #loading-screen { position: fixed; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .scanner { width: 300px; height: 2px; background: var(--neon-text); box-shadow: 0 0 15px var(--neon-text); animation: scan 2s infinite; }
-        @keyframes scan { 0%, 100% { transform: translateY(-50px); } 50% { transform: translateY(50px); } }
+        .action-bar { padding: 15px; background: #1a1a1a; display: flex; gap: 10px; border-bottom: 1px solid #333; flex-wrap: wrap; }
+        input[type="text"] { background: #000; border: 1px solid var(--gold); color: #fff; padding: 10px; border-radius: 5px; flex: 1; min-width: 200px; }
+        .btn { background: var(--gold); color: #000; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 5px; }
 
-        /* الحاوية الرئيسية */
-        .system-container { max-width: 1200px; margin: 10px auto; border: 2px solid var(--main-gold); background: rgba(10,10,10,0.95); min-height: 90vh; display: none; position: relative; box-shadow: 0 0 40px rgba(212,175,55,0.2); }
+        table { width: 100%; border-collapse: collapse; background: #000; }
+        th { background: var(--gold); color: #000; padding: 12px; font-size: 14px; }
+        td { border-bottom: 1px solid #222; padding: 10px; text-align: center; color: #ddd; }
+        tr:hover { background: #151515; cursor: pointer; }
 
-        /* الهيدر */
-        header { border-bottom: 2px solid var(--main-gold); padding: 20px; display: flex; justify-content: space-between; align-items: center; background: #111; }
-        .logo-section img { width: 120px; filter: drop-shadow(0 0 5px var(--main-gold)); }
-        .status-panel { text-align: left; font-size: 12px; color: var(--neon-text); }
+        /* الأضبارة */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 1000; overflow-y: auto; }
+        .modal-box { background: #111; width: 95%; max-width: 900px; margin: 20px auto; border: 2px solid var(--gold); border-radius: 8px; position: relative; }
+        
+        .tabs { display: flex; background: #000; border-bottom: 1px solid var(--gold); }
+        .tab { padding: 12px; color: var(--gold); cursor: pointer; flex: 1; text-align: center; font-size: 12px; }
+        .tab.active { background: var(--gold); color: #000; font-weight: bold; }
+        .pane { display: none; padding: 20px; }
+        .pane.active { display: block; }
 
-        /* نظام التبويبات */
-        .nav-tabs { display: flex; background: #1a1a1a; border-bottom: 1px solid var(--main-gold); }
-        .tab-link { padding: 15px 25px; cursor: pointer; border-left: 1px solid #333; font-weight: bold; transition: 0.3s; }
-        .tab-link:hover, .tab-link.active { background: var(--main-gold); color: #000; }
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .item { border-bottom: 1px solid #222; padding: 8px; display: flex; justify-content: space-between; }
+        .money { color: var(--green); font-weight: bold; }
 
-        .tab-content { padding: 30px; display: none; }
-        .tab-content.active { display: block; }
-
-        /* المدخلات والأزرار */
-        .input-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        input { background: #000; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 4px; outline: none; }
-        input:focus { border-color: var(--main-gold); box-shadow: 0 0 10px var(--main-gold); }
-        .btn-action { background: var(--main-gold); color: #000; border: none; padding: 12px 30px; font-weight: bold; cursor: pointer; border-radius: 4px; }
-        .btn-action:hover { background: #fff; transform: scale(1.05); }
-
-        /* الجدول العسكري */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #000; }
-        th { background: #222; color: var(--main-gold); padding: 15px; text-align: center; border: 1px solid #333; }
-        td { padding: 12px; border: 1px solid #222; text-align: center; color: #ccc; }
-        tr:hover { background: rgba(212,175,55,0.05); }
-
-        /* --- تصميم التخويل (ID CARD) الفول --- */
-        #id-card-print { display: none; width: 210mm; height: 297mm; background: #fff; padding: 20px; }
-        .official-doc { border: 15px double #000; height: 100%; position: relative; padding: 40px; box-sizing: border-box; background: url('367.gif') no-repeat center; background-size: 40%; background-color: rgba(255,255,255,0.9); background-blend-mode: overlay; }
-        .doc-header { display: flex; justify-content: space-between; border-bottom: 4px solid #000; padding-bottom: 10px; margin-bottom: 30px; }
-        .doc-title { text-align: center; font-size: 36px; text-decoration: underline; margin: 40px 0; font-weight: bold; }
-        .doc-body { font-size: 24px; line-height: 2; text-align: right; }
-        .stamp-area { margin-top: 80px; display: flex; justify-content: space-between; align-items: center; }
-        .red-stamp { width: 160px; height: 160px; border: 6px dashed red; border-radius: 50%; color: red; display: flex; align-items: center; justify-content: center; font-weight: bold; transform: rotate(-15deg); font-size: 20px; }
-
-        @media print {
-            body * { visibility: hidden; }
-            #id-card-print, #id-card-print * { visibility: visible; }
-            #id-card-print { display: block; position: absolute; left: 0; top: 0; }
-        }
+        @media print { .no-print { display: none; } .modal { position: static; display: block; } .tab, .tabs { display: none; } .pane { display: block !important; } }
     </style>
 </head>
 <body>
 
-    <div id="loading-screen">
-        <img src="367.gif" width="150">
-        <h2 style="color: var(--main-gold); margin-top: 20px;">جاري الاتصال بقاعدة البيانات المركزية...</h2>
-        <div class="scanner"></div>
-        <p id="boot-text" style="color: var(--neon-text); font-size: 12px; margin-top: 10px;"></p>
+<div id="lock-screen">
+    <div class="lock-box">
+        <img src="367.gif" width="100">
+        <h2 style="color: var(--gold);">نظام الاستعلام والاستيراد الجماعي</h2>
+        <input type="password" id="passInput" placeholder="أدخل شفرة الوصول" style="text-align:center; padding:10px; margin-bottom:15px; background:#000; border:1px solid var(--gold); color:#fff;">
+        <br>
+        <button class="btn" onclick="checkPass()">دخول سيدي</button>
+    </div>
+</div>
+
+<div class="main-container no-print" id="mainUI">
+    <header>
+        <div class="logo"><img src="367.gif"></div>
+        <div style="text-align:center">
+            <h1 style="margin:0; font-size: 18px;">قاعدة البيانات المركزية - مكتب ميسان</h1>
+            <p style="margin:0; font-size: 11px;">الاستخبارات | المالية | الذمم</p>
+        </div>
+        <div style="font-size: 10px; color: var(--green);">MODE: BULK IMPORT</div>
+    </header>
+
+    <div class="action-bar">
+        <input type="text" id="search" onkeyup="filter()" placeholder="🔍 ابحث عن أي معلومة...">
+        
+        <button class="btn" onclick="document.getElementById('importTxt').click()">📁 استيراد ملف جماعي (TXT)</button>
+        <input type="file" id="importTxt" hidden accept=".txt" onchange="handleBulkImport(event)">
+        
+        <button class="btn" style="background:#444; color:#fff;" onclick="addNewManual()">+ إضافة يدوي</button>
+        <button class="btn" style="background:#ff3333; color:#fff;" onclick="clearAll()">تصفير</button>
     </div>
 
-    <div id="id-card-print">
-        <div class="official-doc">
-            <div class="doc-header">
-                <div style="font-weight:bold;">هيئة الحشد الشعبي<br>مكتب ميسان<br>قسم أمن المقاتلين</div>
-                <img src="367.gif" width="120">
-                <div style="text-align:left;">التاريخ: <span id="p-date"></span><br>الرقم: <span id="p-serial"></span></div>
-            </div>
-            <div class="doc-title">تخويل حركة وأمن سري</div>
-            <div class="doc-body">
-                نخول المجاهد: <b id="p-name" style="font-size: 32px; border-bottom: 2px solid #000;"></b><br>
-                الصنف / الاختصاص: <b id="p-rank"></b><br>
-                جهة الانتساب: <b id="p-office"></b><br>
-                <p>يسمح لحامل هذا الكتاب بالمرور عبر كافة القواطع العسكرية والسيطرات الأمنية، وتسهيل مهامه القتالية والأمنية الموكلة إليه رسمياً. يمنع الاعتراض أو التأخير تحت طائلة المسؤولية.</p>
-            </div>
-            <div class="stamp-area">
-                <div style="text-align:center;">توقيع المسؤول المختص<br><br>_____________</div>
-                <div class="red-stamp">مكتب ميسان<br>سري للغاية</div>
-                <div style="text-align:center;">توقيع وآمر المكتب<br><br>_____________</div>
-            </div>
-            <div style="margin-top: 50px; text-align: center; font-family: 'barcode'; font-size: 40px;">*SEC-INTEL-2026*</div>
+    <table id="table">
+        <thead>
+            <tr><th>المعرف</th><th>الاسم الكامل</th><th>الصنف</th><th>الراتب</th><th>الحالة</th></tr>
+        </thead>
+        <tbody id="body"></tbody>
+    </table>
+</div>
+
+<div id="modal" class="modal">
+    <div class="modal-box">
+        <div class="no-print" style="background:var(--gold); padding:10px; color:#000; display:flex; justify-content:space-between; font-weight:bold;">
+            <span>الملف الإلكتروني للمنتسب</span>
+            <span style="cursor:pointer;" onclick="closeM()">[ إغلاق ]</span>
         </div>
+        <div class="tabs no-print">
+            <div class="tab active" onclick="showT(event, 't1')">البيانات الإدارية</div>
+            <div class="tab" onclick="showT(event, 't2')">الذمة والعتاد</div>
+            <div class="tab" onclick="showT(event, 't3')">السجل المالي</div>
+        </div>
+        <div id="t1" class="pane active"><div class="data-grid" id="d1"></div></div>
+        <div id="t2" class="pane"><div class="data-grid" id="d2"></div></div>
+        <div id="t3" class="pane"><div class="data-grid" id="d3"></div></div>
+        <div style="padding:20px;" class="no-print"><button class="btn" onclick="window.print()">طباعة الملف</button></div>
     </div>
+</div>
 
-    <div class="system-container" id="main-ui">
-        <header>
-            <div class="logo-section"><img src="367.gif"></div>
-            <div style="text-align: center;">
-                <h1>نظام القيادة والسيطرة v7.0</h1>
-                <p style="margin:0; font-size: 12px; color: #888;">INTERNAL SECURITY PROTOCOL - MAYSAN HQ</p>
-            </div>
-            <div class="status-panel">
-                SYSTEM: ACTIVE<br>ENCRYPTION: AES-256<br>USER: ADMIN_MONTATHER
-            </div>
-        </header>
+<script>
+    let db = JSON.parse(localStorage.getItem("bulk_maysan_db") || "[]");
 
-        <nav class="nav-tabs">
-            <div class="tab-link active" onclick="openTab(event, 'dashboard')">سجل الأفراد</div>
-            <div class="tab-link" onclick="openTab(event, 'add-entry')">إضافة بيانات</div>
-            <div class="tab-link" onclick="openTab(event, 'import-export')">قاعدة البيانات</div>
-        </nav>
+    function checkPass() {
+        if(document.getElementById("passInput").value === "2026") {
+            document.getElementById("lock-screen").style.display = "none";
+            document.getElementById("mainUI").style.display = "block";
+            render();
+        } else { alert("الشفرة خاطئة سيدي!"); }
+    }
 
-        <div id="dashboard" class="tab-content active">
-            <input type="text" id="searchBox" onkeyup="search()" placeholder="🔍 ابحث عن اسم، صنف، أو رقم تعريفي..." style="width: 100%; margin-bottom: 20px; border-color: var(--neon-text);">
-            <table id="intelTable">
-                <thead>
-                    <tr>
-                        <th>المعرف</th>
-                        <th>الاسم الكامل</th>
-                        <th>الصنف</th>
-                        <th>المكتب</th>
-                        <th>الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
+    function render() {
+        let h = "";
+        db.forEach((p, i) => {
+            h += `<tr onclick="openM(${i})">
+                <td>${p.id}</td>
+                <td style="color:#fff; font-weight:bold;">${p.name}</td>
+                <td>${p.branch}</td>
+                <td class="money">${p.salary} د.ع</td>
+                <td style="color:var(--green)">سليم</td>
+            </tr>`;
+        });
+        document.getElementById("body").innerHTML = h;
+    }
 
-        <div id="add-entry" class="tab-content">
-            <h2 style="border-right: 4px solid var(--main-gold); padding-right: 15px;">إدخال بيانات مقاتل جديد</h2>
-            <div class="input-group">
-                <input type="text" id="inName" placeholder="الاسم الرباعي واللقب">
-                <input type="text" id="inRank" placeholder="الصنف / الرتبة">
-                <input type="text" id="inOffice" placeholder="جهة التنسيب (المكتب)">
-            </div>
-            <button class="btn-action" onclick="saveData()">+ حفظ البيانات في النظام</button>
-        </div>
+    // محرك الاستيراد الجماعي سيدي
+    function handleBulkImport(event) {
+        let file = event.target.files[0];
+        if (!file) return;
 
-        <div id="import-export" class="tab-content">
-            <h2>إدارة الملفات الخارجية</h2>
-            <div style="background: #111; padding: 20px; border: 1px solid #333;">
-                <p>سيدي، يمكنك رفع ملف نصي يحتوي على الأسماء (الاسم, الصنف, المكتب):</p>
-                <input type="file" id="fileUploader" accept=".txt">
-                <button class="btn-action" onclick="importFile()">بدء الاستيراد الجماعي</button>
-                <br><br>
-                <button class="btn-action" style="background: #444; color: #fff;" onclick="clearDB()">⚠️ مسح كافة البيانات</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // نظام الدخول الأمني سيدي
-        window.onload = function() {
-            let pass = prompt("سيدي، يرجى إدخال شفرة الوصول:");
-            if (pass !== "2026") {
-                window.location.href = "https://google.com";
-            } else {
-                startBoot();
-            }
-        };
-
-        function startBoot() {
-            let text = "INITIALIZING SYSTEM... ACCESS GRANTED... LOADING DATABASE... CONNECTING TO MAYSAN SERVER...";
-            let i = 0;
-            let speed = 50;
-            function type() {
-                if (i < text.length) {
-                    document.getElementById("boot-text").innerHTML += text.charAt(i);
-                    i++;
-                    setTimeout(type, speed);
-                } else {
-                    setTimeout(() => {
-                        document.getElementById("loading-screen").style.display = "none";
-                        document.getElementById("main-ui").style.display = "block";
-                        renderTable();
-                    }, 1000);
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            let lines = e.target.result.split('\n');
+            let count = 0;
+            lines.forEach(line => {
+                if(line.trim() !== "") {
+                    let parts = line.split(','); // التنسيق: الاسم, الصنف, الراتب
+                    let p = {
+                        id: "M-" + Math.floor(10000 + Math.random() * 90000),
+                        name: parts[0] ? parts[0].trim() : "غير معرف",
+                        branch: parts[1] ? parts[1].trim() : "مشاة",
+                        salary: parts[2] ? parts[2].trim() : "1,100,000",
+                        addr: "ميسان", brig: "لواء 1", rank: "مقاتل", weap: "AK-47",
+                        weap_sn: "SN-" + Math.floor(Math.random()*999), gear: "كاملة",
+                        bank: "الرافدين", master: "6020 XXXX", allow: "خطورة", stat: "سليم"
+                    };
+                    db.push(p);
+                    count++;
                 }
-            }
-            type();
-        }
-
-        function openTab(evt, tabName) {
-            let i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) tabcontent[i].className = tabcontent[i].className.replace(" active", "");
-            tablinks = document.getElementsByClassName("tab-link");
-            for (i = 0; i < tablinks.length; i++) tablinks[i].className = tablinks[i].className.replace(" active", "");
-            document.getElementById(tabName).className += " active";
-            evt.currentTarget.className += " active";
-        }
-
-        function saveData() {
-            let n = document.getElementById("inName").value, r = document.getElementById("inRank").value, o = document.getElementById("inOffice").value;
-            if(!n || !r || !o) return alert("سيدي، البيانات ناقصة.");
-            let db = JSON.parse(localStorage.getItem("final_intel_db") || "[]");
-            db.push({id: "INTEL-" + Math.floor(1000 + Math.random() * 9000), name: n, rank: r, office: o, date: new Date().toLocaleDateString('ar-EG')});
-            localStorage.setItem("final_intel_db", JSON.stringify(db));
-            alert("تم الحفظ بنجاح سيدي.");
-            renderTable();
-            document.getElementById("inName").value = ""; document.getElementById("inRank").value = ""; document.getElementById("inOffice").value = "";
-        }
-
-        function renderTable() {
-            let db = JSON.parse(localStorage.getItem("final_intel_db") || "[]");
-            let html = "";
-            db.forEach((item, index) => {
-                html += `<tr>
-                    <td>${item.id}</td>
-                    <td style="color:#fff; font-weight:bold;">${item.name}</td>
-                    <td>${item.rank}</td>
-                    <td>${item.office}</td>
-                    <td>
-                        <button class="btn-action" style="padding:5px 10px; font-size:11px;" onclick="printTakhwil('${item.name}','${item.rank}','${item.office}','${item.id}','${item.date}')">طباعة التخويل</button>
-                        <button class="btn-action" style="background:#600; color:#fff; padding:5px 10px; font-size:11px;" onclick="deleteRow(${index})">حذف</button>
-                    </td>
-                </tr>`;
             });
-            document.getElementById("tableBody").innerHTML = html;
-        }
+            localStorage.setItem("bulk_maysan_db", JSON.stringify(db));
+            alert("سيدي، تم استيراد " + count + " منتسب بنجاح.");
+            render();
+        };
+        reader.readAsText(file);
+    }
 
-        function printTakhwil(n, r, o, id, d) {
-            document.getElementById('p-name').innerText = n;
-            document.getElementById('p-rank').innerText = r;
-            document.getElementById('p-office').innerText = o;
-            document.getElementById('p-serial').innerText = id;
-            document.getElementById('p-date').innerText = d;
-            window.print();
-        }
+    function openM(i) {
+        let p = db[i];
+        fill("d1", {"الاسم":p.name, "المعرف":p.id, "الصنف":p.branch, "الرتبة":p.rank, "السكن":p.addr, "الموقف":p.stat});
+        fill("d2", {"نوع السلاح":p.weap, "رقم السلاح":p.weap_sn, "التجهيزات":p.gear, "اللواء":p.brig});
+        fill("d3", {"الراتب المستلم":p.salary + " د.ع", "المصرف":p.bank, "الماستر كارد":p.master, "المخصصات":p.allow});
+        document.getElementById("modal").style.display = "block";
+    }
 
-        function deleteRow(i) {
-            if(confirm("سيدي، هل أنت متأكد من مسح هذا الملف؟")) {
-                let db = JSON.parse(localStorage.getItem("final_intel_db") || "[]");
-                db.splice(i, 1);
-                localStorage.setItem("final_intel_db", JSON.stringify(db));
-                renderTable();
-            }
-        }
+    function fill(id, data) {
+        let h = "";
+        for (let k in data) h += `<div class="item"><span style="color:var(--gold)">${k}:</span><span class="${k.includes('الراتب')?'money':''}">${data[k]}</span></div>`;
+        document.getElementById(id).innerHTML = h;
+    }
 
-        function search() {
-            let filter = document.getElementById("searchBox").value.toUpperCase();
-            let tr = document.getElementById("tableBody").getElementsByTagName("tr");
-            for (let i = 0; i < tr.length; i++) {
-                let td = tr[i].getElementsByTagName("td")[1];
-                if (td) {
-                    let text = td.textContent || td.innerText;
-                    tr[i].style.display = text.toUpperCase().indexOf(filter) > -1 ? "" : "none";
-                }
-            }
-        }
+    function showT(e, id) {
+        let ps = document.getElementsByClassName("pane"), ts = document.getElementsByClassName("tab");
+        for(let x of ps) x.classList.remove("active");
+        for(let x of ts) x.classList.remove("active");
+        document.getElementById(id).classList.add("active");
+        e.currentTarget.classList.add("active");
+    }
 
-        function importFile() {
-            let file = document.getElementById("fileUploader").files[0];
-            if(!file) return alert("اختر الملف أولاً سيدي.");
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                let lines = e.target.result.split('\n');
-                let db = JSON.parse(localStorage.getItem("final_intel_db") || "[]");
-                lines.forEach(l => {
-                    let p = l.split(',');
-                    if(p.length >= 3) db.push({id: "INTEL-" + Math.floor(1000 + Math.random() * 9000), name: p[0].trim(), rank: p[1].trim(), office: p[2].trim(), date: new Date().toLocaleDateString('ar-EG')});
-                });
-                localStorage.setItem("final_intel_db", JSON.stringify(db));
-                renderTable();
-                alert("تم استيراد القائمة بنجاح سيدي.");
-            };
-            reader.readAsText(file, "UTF-8");
-        }
-
-        function clearDB() {
-            if(confirm("سيدي، سيتم مسح السجل بالكامل، هل أنت متأكد؟")) {
-                localStorage.removeItem("final_intel_db");
-                renderTable();
-            }
-        }
-    </script>
+    function closeM() { document.getElementById("modal").style.display = "none"; }
+    function filter() {
+        let v = document.getElementById("search").value.toUpperCase();
+        let tr = document.getElementById("table").getElementsByTagName("tr");
+        for(let i=1; i<tr.length; i++) tr[i].style.display = tr[i].innerText.toUpperCase().includes(v) ? "" : "none";
+    }
+    function clearAll() { if(confirm("تصفير كافة السجلات سيدي؟")) { localStorage.removeItem("bulk_maysan_db"); location.reload(); } }
+</script>
 </body>
 </html>
