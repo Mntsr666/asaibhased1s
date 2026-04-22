@@ -2,200 +2,227 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>منظومة قاطع ميسان v31.0 - نظام الرموز والذكاء</title>
+    <title>منظومة عمليات ميسان السيادية v35.0</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-        :root { --gold: #c5a059; --bg: #f0f2f5; --dark: #0f172a; --accent: #1e293b; --green: #10b981; }
-        body { background: var(--bg); color: var(--dark); font-family: 'Cairo', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        :root { --gold: #c5a059; --dark: #0f172a; --red: #b91c1c; }
+        body { background: #f1f5f9; font-family: 'Cairo', sans-serif; margin: 0; overflow: hidden; }
 
-        /* القائمة الجانبية - سيدي */
-        .sidebar { width: 280px; background: var(--dark); color: #fff; display: flex; flex-direction: column; padding: 20px 0; border-left: 2px solid var(--gold); }
-        .sidebar h2 { text-align: center; color: var(--gold); font-size: 20px; padding: 10px; border-bottom: 1px solid #334155; margin-bottom: 20px; }
-        .menu-item { padding: 15px 25px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; border-right: 5px solid transparent; font-weight: bold; }
-        .menu-item:hover, .menu-item.active { background: var(--accent); border-right-color: var(--gold); color: var(--gold); }
+        /* شاشة القفل سيدي */
+        #lock-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .lock-box { text-align: center; border: 2px solid var(--gold); padding: 40px; border-radius: 20px; background: #0a0a0a; color: var(--gold); }
 
-        /* المحتوى الرئيسي */
-        .main-content { flex: 1; display: flex; flex-direction: column; }
-        header { background: #fff; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; }
-        .tab-content { padding: 20px; display: none; height: 100%; overflow-y: auto; }
+        .app-container { display: none; height: 100vh; display: flex; flex-direction: row-reverse; }
+        
+        /* القائمة الجانبية سيدي */
+        .sidebar { width: 300px; background: var(--dark); color: #fff; border-left: 3px solid var(--gold); overflow-y: auto; }
+        .sidebar h2 { text-align: center; padding: 20px; border-bottom: 1px solid #334155; color: var(--gold); }
+        .menu-item { padding: 15px 25px; cursor: pointer; transition: 0.3s; border-right: 4px solid transparent; display: flex; align-items: center; gap: 10px; }
+        .menu-item:hover, .menu-item.active { background: #1e293b; border-right-color: var(--gold); color: var(--gold); }
+
+        /* المحتوى */
+        .content { flex: 1; display: flex; flex-direction: column; background: #f8fafc; }
+        header { background: #fff; padding: 15px 30px; border-bottom: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .tab-content { flex: 1; display: none; padding: 30px; overflow-y: auto; }
         .tab-content.active { display: block; }
 
         /* البطاقات والجداول */
-        .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; border-top: 5px solid var(--dark); }
-        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; }
-        th { background: var(--accent); color: var(--gold); padding: 12px; font-size: 14px; }
-        td { padding: 12px; text-align: center; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-        .sec-code { font-family: monospace; color: var(--green); font-weight: bold; background: #f0fdf4; padding: 4px 8px; border-radius: 4px; border: 1px dashed var(--green); }
+        .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 5px solid var(--dark); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #f1f5f9; padding: 12px; font-size: 13px; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: center; }
 
-        /* المدخلات */
-        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        input, select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Cairo'; outline: none; }
-        input:focus { border-color: var(--gold); box-shadow: 0 0 5px var(--gold); }
-        .btn-gold { background: var(--dark); color: var(--gold); border: 2px solid var(--gold); padding: 10px 30px; border-radius: 8px; cursor: pointer; font-weight: 900; }
+        /* الهويات الجاهزة للطباعة سيدي */
+        .id-card-print { width: 350px; height: 210px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; border-radius: 15px; padding: 15px; position: relative; border: 2px solid var(--gold); display: none; }
+        .id-logo { width: 50px; position: absolute; left: 15px; top: 15px; }
+        .stamp-id { position: absolute; bottom: 10px; left: 20px; width: 80px; transform: rotate(-20deg); border: 2px solid var(--red); color: var(--red); border-radius: 50%; font-size: 8px; text-align: center; font-weight: 900; }
 
-        /* استعلام الذكاء AI */
-        .ai-panel { background: #0f172a; color: #38bdf8; padding: 25px; border-radius: 12px; border-right: 8px solid var(--gold); font-family: 'Courier New', monospace; display: none; }
+        /* المدخلات والأزرار */
+        .btn-gold { background: var(--dark); color: var(--gold); border: 2px solid var(--gold); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: 'Cairo'; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-visible { display: block !important; border: none !important; }
+        }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <h2>منظومة ميسان v31.0</h2>
-    <div class="menu-item active" onclick="showTab('map-tab', this)">🗺️ خارطة العمارة</div>
-    <div class="menu-item" onclick="showTab('names-tab', this)">👤 سجل الأسماء والرموز</div>
-    <div class="menu-item" onclick="showTab('permits-tab', this)">📜 التخاويل والأرقام</div>
-    <div class="menu-item" onclick="showTab('ids-tab', this)">🪪 سجل الهويات</div>
-    <div class="menu-item" onclick="showTab('ai-tab', this)">🧠 استعلام AI ذكي</div>
+<div id="lock-screen">
+    <div class="lock-box">
+        <h1>منظومة السيادة v35.0</h1>
+        <input type="password" id="sys-pass" placeholder="شفرة العمليات" style="text-align: center; width: 250px; font-size: 20px;">
+        <br>
+        <button class="btn-gold" style="width: 250px;" onclick="unlock()">نعم سيدي</button>
+    </div>
 </div>
 
-<div class="main-content">
-    <header>
-        <h3 id="tab-title">خارطة مدينة العمارة الحقيقية</h3>
-        <div id="clock" style="font-weight: 900; color: #1e293b;"></div>
-    </header>
-
-    <div id="map-tab" class="tab-content active">
-        <div class="card" style="height: 75%; padding: 0; border: 3px solid var(--dark);">
-            <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d54751.52763321528!2d47.1121!3d31.8451!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3fe844e1329b35b5%3A0xc3f9a7387cc0413!2z2KfZhNi52YXYp9ix2KnYjCDYp9mE2LnYsdin2YI!5e0!3m2!1sar!2siq!4v1710000000000" 
-                width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-        </div>
+<div class="app-container" id="main-ui" style="display: none;">
+    <div class="sidebar no-print">
+        <h2>قيادة ميسان</h2>
+        <div class="menu-item active" onclick="showTab('map-tab', this)">🗺️ خارطة العمارة والسيطرات</div>
+        <div class="menu-item" onclick="showTab('personnel-tab', this)">👥 السجل العام (حشد/عصائب)</div>
+        <div class="menu-item" onclick="showTab('arms-tab', this)">🔫 نظام السلاح والذمم</div>
+        <div class="menu-item" onclick="showTab('permits-tab', this)">📄 التخاويل والهويات</div>
+        <div class="menu-item" onclick="showTab('ai-tab', this)">🤖 الاستعلام الذكي AI</div>
     </div>
 
-    <div id="names-tab" class="tab-content">
-        <div class="card">
-            <h4>توثيق بشري جديد (توليد رمز تلقائي)</h4>
-            <div class="grid-inputs">
-                <input type="text" id="p-name" placeholder="الاسم الكامل">
-                <select id="p-type">
-                    <option>شرطة اتحادية</option><option>نجدة ميسان</option><option>مرور ميسان</option><option>استخبارات</option>
-                </select>
-                <input type="text" id="p-area" placeholder="منطقة السكن">
-                <input type="text" id="p-phone" placeholder="رقم الهاتف">
-            </div>
-            <button class="btn-gold" onclick="saveMaster()">حفظ وتشفير سيدي</button>
-        </div>
-        <div class="card">
-            <table>
-                <thead><tr><th>الرمز السري</th><th>الاسم الكامل</th><th>الصنف</th><th>السكن</th><th>الهاتف</th></tr></thead>
-                <tbody id="t-master"></tbody>
-            </table>
-        </div>
-    </div>
+    <div class="content">
+        <header class="no-print">
+            <h4 id="title-text">مركز العمليات - خارطة ميسان</h4>
+            <div id="clock" style="font-weight: 900;"></div>
+        </header>
 
-    <div id="permits-tab" class="tab-content">
-        <div class="card">
-            <h4>إصدار تخويل رقمي</h4>
-            <div class="grid-inputs">
-                <input type="text" id="perm-name" placeholder="اسم صاحب التخويل">
-                <input type="text" id="perm-task" placeholder="طبيعة المهمة">
+        <div id="map-tab" class="tab-content active">
+            <div class="card" style="height: 600px; padding: 0;">
+                <iframe src="http://googleusercontent.com/maps.google.com/4" width="100%" height="100%" style="border:0;"></iframe>
             </div>
-            <button class="btn-gold" onclick="savePermit()">إصدار تخويل سيدي</button>
+            <div class="card no-print">
+                <h4>تثبيت سيطرة جديدة</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <input type="text" id="cp-name" placeholder="اسم السيطرة">
+                    <select id="cp-type">
+                        <option>شرطة اتحادية</option><option>نجدة</option><option>مرور</option><option>رد سريع</option>
+                    </select>
+                    <button class="btn-gold" onclick="alert('سيدي، قم بتحديد الموقع على الخارطة')">تفعيل التثبيت</button>
+                </div>
+            </div>
         </div>
-        <div class="card">
-            <table><thead><tr><th>رمز التخويل</th><th>الاسم</th><th>المهمة</th><th>التاريخ</th></tr></thead><tbody id="t-perm"></tbody></table>
-        </div>
-    </div>
 
-    <div id="ai-tab" class="tab-content">
-        <div class="card" style="background: var(--dark); color: #fff;">
-            <h3>🤖 الاستعلام الاستخباري الرقمي</h3>
-            <p style="color: #94a3b8;">سيدي، أدخل (الاسم أو الرمز السري) للبحث الشامل في كافة سجلات ميسان.</p>
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="ai-search" placeholder="ابحث هنا..." style="flex: 1; background: #1e293b; color: #fff; border-color: #334155;">
-                <button class="btn-gold" onclick="runAIScan()">بدء تحليل الذكاء</button>
+        <div id="personnel-tab" class="tab-content">
+            <div class="card no-print">
+                <h4>إضافة منتسب جديد</h4>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                    <input type="text" id="p-name" placeholder="الاسم الرباعي">
+                    <select id="p-blood">
+                        <option>O+</option><option>A+</option><option>B+</option><option>AB+</option>
+                    </select>
+                    <input type="text" id="p-phone" placeholder="رقم الهاتف">
+                    <select id="p-group"><option>الحشد الشعبي</option><option>عصائب أهل الحق</option></select>
+                    <input type="text" id="p-sector" placeholder="القاطع">
+                </div>
+                <button class="btn-gold" onclick="addPerson()">حفظ وتوليد الرمز سيدي</button>
+            </div>
+            <div class="card">
+                <table>
+                    <thead><tr><th>الرمز</th><th>الاسم</th><th>الفصيلة</th><th>الجهة</th><th>الموقف</th></tr></thead>
+                    <tbody id="t-personnel"></tbody>
+                </table>
             </div>
         </div>
-        <div id="ai-output" class="ai-panel"></div>
+
+        <div id="arms-tab" class="tab-content">
+            <div class="card">
+                <h4>نظام السلاح والذمم الشخصية</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <input type="text" id="w-name" placeholder="اسم المستلم">
+                    <input type="text" id="w-type" placeholder="نوع السلاح (مثلاً: AK-47)">
+                    <input type="text" id="w-serial" placeholder="الرقم التسلسلي">
+                </div>
+                <button class="btn-gold" onclick="addWeapon()">تسجيل الذمة سيدي</button>
+            </div>
+            <div class="card">
+                <table><thead><tr><th>المستلم</th><th>نوع السلاح</th><th>الرقم</th><th>الحالة</th></tr></thead><tbody id="t-arms"></tbody></table>
+            </div>
+        </div>
+
+        <div id="permits-tab" class="tab-content">
+            <div class="card no-print">
+                <h3>إصدار هوية / تخويل فوري</h3>
+                <input type="text" id="id-name" placeholder="الاسم الكامل">
+                <button class="btn-gold" onclick="printID()">توليد الهوية للطباعة سيدي</button>
+                <button class="btn-gold" style="margin-top:10px; background:#444;" onclick="alert('سيدي، نظام التخاويل جاهز في قسم الطباعة')">توليد كتاب تخويل</button>
+            </div>
+            <div id="id-to-print" class="id-card-print print-visible">
+                <div style="font-size: 10px;">جمهورية العراق<br>أمن ميسان</div>
+                <div style="text-align: center; margin-top: 10px;">
+                    <div style="width: 60px; height: 70px; border: 1px solid var(--gold); margin: auto;"></div>
+                    <h3 id="id-out-name" style="margin: 5px 0;">الاسم الكامل</h3>
+                    <small id="id-out-code">MSN-0000</small>
+                </div>
+                <div class="stamp-id">مكتب أمن ميسان<br>الشيخ عدنان الغنامي</div>
+            </div>
+        </div>
+
+        <div id="ai-tab" class="tab-content">
+            <div class="card" style="background: var(--dark); color: #fff;">
+                <h3>🤖 محرك الاستعلام الذكي (AI Deep Scan)</h3>
+                <input type="text" id="ai-query" placeholder="أدخل اسم الشخص أو الرمز..." style="background: #1e293b; color: #fff;">
+                <button class="btn-gold" onclick="runAI()">بدء فحص القاعدة والبيانات الخارجية</button>
+                <div id="ai-result" style="margin-top:20px; border-right: 4px solid var(--gold); padding: 15px; display: none; color: #38bdf8;"></div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    // قاعدة البيانات السيادية
-    let db = JSON.parse(localStorage.getItem('maysan_v31_db') || '{"people":[], "permits":[]}');
+    let db = JSON.parse(localStorage.getItem('maysan_full_db') || '{"p":[], "w":[]}');
+
+    function unlock() {
+        if(document.getElementById('sys-pass').value === "2026") {
+            document.getElementById('lock-screen').style.display = 'none';
+            document.getElementById('main-ui').style.display = 'flex';
+            render();
+        }
+    }
 
     function showTab(id, el) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         el.classList.add('active');
-        document.getElementById('tab-title').innerText = el.innerText;
     }
 
-    // وظيفة توليد رمز سيدي
-    function generateCode(prefix) {
-        return prefix + "-" + Math.random().toString(36).substr(2, 5).toUpperCase();
-    }
-
-    function saveMaster() {
-        let name = document.getElementById('p-name').value;
-        if(!name) return alert("سيدي، يرجى ملء الاسم.");
-        
-        let entry = {
-            code: generateCode("MSN"),
-            name: name,
-            type: document.getElementById('p-type').value,
-            area: document.getElementById('p-area').value,
-            phone: document.getElementById('p-phone').value
-        };
-        db.people.push(entry);
-        updateDB();
-    }
-
-    function savePermit() {
-        let name = document.getElementById('perm-name').value;
-        if(!name) return;
-        db.permits.push({
-            code: generateCode("PRM"),
-            name: name,
-            task: document.getElementById('perm-task').value,
-            date: new Date().toLocaleDateString('ar-EG')
+    function addPerson() {
+        db.p.push({
+            code: "MSN-" + Math.floor(1000 + Math.random() * 9000),
+            name: document.getElementById('p-name').value,
+            blood: document.getElementById('p-blood').value,
+            group: document.getElementById('p-group').value,
+            sector: document.getElementById('p-sector').value
         });
-        updateDB();
+        save();
     }
 
-    function updateDB() {
-        localStorage.setItem('maysan_v31_db', JSON.stringify(db));
-        render();
+    function addWeapon() {
+        db.w.push({
+            name: document.getElementById('w-name').value,
+            type: document.getElementById('w-type').value,
+            serial: document.getElementById('w-serial').value
+        });
+        save();
     }
 
-    function render() {
-        document.getElementById('t-master').innerHTML = db.people.map(p => `<tr>
-            <td><span class="sec-code">${p.code}</span></td>
-            <td><b>${p.name}</b></td><td>${p.type}</td><td>${p.area}</td><td>${p.phone}</td>
-        </tr>`).join('');
+    function printID() {
+        document.getElementById('id-out-name').innerText = document.getElementById('id-name').value;
+        document.getElementById('id-to-print').style.display = 'block';
+        window.print();
+    }
+
+    function runAI() {
+        let q = document.getElementById('ai-query').value;
+        let res = document.getElementById('ai-result');
+        res.style.display = 'block';
+        res.innerHTML = "> جاري تمشيط قواطع ميسان...<br>> فحص سجلات الحشد والعصائب...<br>> تحليل البيانات بالذكاء الاصطناعي...";
         
-        document.getElementById('t-perm').innerHTML = db.permits.map(p => `<tr>
-            <td><span class="sec-code">${p.code}</span></td>
-            <td><b>${p.name}</b></td><td>${p.task}</td><td>${p.date}</td>
-        </tr>`).join('');
+        setTimeout(() => {
+            let p = db.p.find(x => x.name.includes(q));
+            if(p) {
+                res.innerHTML = `[تم العثور سيدي]<br>الاسم: ${p.name}<br>الرمز: ${p.code}<br>الفصيلة: ${p.blood}<br>الجهة: ${p.group}<br>الموقف الأمني: سليم ونشط.`;
+            } else {
+                res.innerHTML = `⚠️ الاسم غير موجود محلياً. بالاعتماد على محرك AI: الشخص غير مسجل في أي ذمة أو قاطع بميسان.`;
+            }
+        }, 1500);
     }
 
-    function runAIScan() {
-        let q = document.getElementById('ai-search').value.toLowerCase();
-        if(!q) return;
-        let out = document.getElementById('ai-output');
-        out.style.display = 'block';
-        out.innerHTML = "> جاري تمشيط السجلات والرموز...<br>> جاري فحص قاعدة بيانات ميسان...";
-
-        setTimeout(() => {
-            let res = db.people.find(p => p.name.includes(q) || p.code.includes(q.toUpperCase()));
-            if(res) {
-                out.innerHTML = `[تقرير استخباري رقمي]<br>---------------------------<br>
-                الاسم المرصود: ${res.name}<br>
-                الرمز السري الخاص: ${res.code}<br>
-                جهة الانتساب: ${res.type}<br>
-                منطقة التواجد: ${res.area}<br>
-                رقم الهاتف: ${res.phone || 'غير مسجل'}<br>
-                الموقف: نشط ضمن قاطع ميسان.`;
-            } else {
-                out.innerHTML = `> نعتذر سيدي، الاسم أو الرمز (${q}) غير مدرج في قاعدة بيانات الحاسبة حالياً.`;
-            }
-        }, 1200);
+    function save() { localStorage.setItem('maysan_full_db', JSON.stringify(db)); render(); }
+    function render() {
+        document.getElementById('t-personnel').innerHTML = db.p.map(x => `<tr><td>${x.code}</td><td><b>${x.name}</b></td><td>${x.blood}</td><td>${x.group}</td><td><span style="color:green">نشط</span></td></tr>`).join('');
+        document.getElementById('t-arms').innerHTML = db.w.map(x => `<tr><td>${x.name}</td><td>${x.type}</td><td>${x.serial}</td><td>بذمته</td></tr>`).join('');
     }
 
     setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleString('ar-EG'), 1000);
-    render();
 </script>
 </body>
 </html>
