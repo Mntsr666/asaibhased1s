@@ -167,3 +167,54 @@
 
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>منظومة معالجة النصوص - ميسان</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #0a0a0a; color: #fff; padding: 20px; text-align: right; }
+        .box { background: #111; border: 1px solid #ffd700; padding: 20px; border-radius: 10px; }
+        .btn { background: #ffd700; color: #000; padding: 15px; border: none; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        #output { background: #000; color: #0f0; padding: 15px; margin-top: 20px; white-space: pre-wrap; border: 1px dashed #333; height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>📂 محول الـ PDF إلى نصوص أمنية</h2>
+    <p>اختر ملف الـ PDF وسيقوم النظام بسحب الأسماء والمعلومات منه فوراً:</p>
+    <input type="file" id="pdfInput" accept=".pdf" style="width: 100%;">
+    <button class="btn" onclick="extractText()">تحويل واستخراج النصوص</button>
+</div>
+
+<div id="output">النصوص المستخرجة ستظهر هنا سيدي...</div>
+
+<script>
+    async function extractText() {
+        const file = document.getElementById('pdfInput').files[0];
+        if (!file) return alert("سيدي، يرجى اختيار ملف أولاً.");
+
+        const reader = new FileReader();
+        reader.onload = async function() {
+            const typedarray = new Uint8Array(this.result);
+            const pdf = await pdfjsLib.getDocument(typedarray).promise;
+            let fullText = "";
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(s => s.str).join(" ");
+                fullText += `--- الصفحة ${i} ---\n` + pageText + "\n\n";
+            }
+
+            document.getElementById('output').innerText = fullText;
+            alert("تم استخراج النصوص بنجاح سيدي. يمكنك الآن نسخها والبحث فيها.");
+        };
+        reader.readAsArrayBuffer(file);
+    }
+</script>
+
+</body>
+</html>
