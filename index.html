@@ -2,135 +2,120 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>منظومة آل حميد - الوصول المركز</title>
+    <title>TACTICAL ARCHIVE v4.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
     <style>
-        :root { --neon: #00ff41; --bg: #050505; --panel: #111; }
-        body { background: var(--bg); color: #fff; font-family: 'Tahoma', sans-serif; margin: 0; overflow-x: hidden; }
+        :root { --army: #4b5320; --gold: #d4af37; --bg: #1a1a1a; --text: #e0e0e0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; margin: 0; padding: 20px; border: 5px solid var(--army); min-height: 94vh; }
         
-        /* واجهة الدخول */
-        #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-box { border: 1px solid var(--neon); padding: 40px; text-align: center; box-shadow: 0 0 20px rgba(0,255,65,0.2); border-radius: 5px; }
+        /* شاشة التحقق */
+        #lock-screen { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .lock-box { border: 2px solid var(--army); padding: 50px; background: #222; box-shadow: inset 0 0 15px #000; text-align: center; }
         
-        /* واجهة النظام */
-        #main-system { display: none; padding: 20px; }
-        .header { border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 20px; text-shadow: 0 0 10px var(--neon); }
-        
-        input, button { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 4px; outline: none; }
-        input:focus { border-color: var(--neon); }
-        button { background: var(--neon); color: black; font-weight: bold; cursor: pointer; border: none; }
-        button:hover { background: #00cc33; }
+        input { background: #000; border: 1px solid var(--army); color: var(--gold); padding: 12px; border-radius: 2px; width: 250px; outline: none; font-weight: bold; text-align: center; }
+        button { background: var(--army); color: #fff; border: 1px solid var(--gold); padding: 12px 30px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
+        button:hover { background: #3e441a; box-shadow: 0 0 10px var(--gold); }
 
-        .search-area { background: var(--panel); padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #222; color: var(--neon); padding: 12px; text-align: right; border-bottom: 2px solid #333; }
-        td { padding: 10px; border-bottom: 1px solid #222; font-size: 13px; }
-        tr:hover { background: #1a1a1a; }
+        #app-content { display: none; }
+        .header { border-bottom: 3px double var(--army); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .status-tag { background: var(--army); color: #fff; padding: 5px 15px; font-size: 12px; }
+
+        .console { background: #000; border: 1px solid #333; padding: 20px; border-radius: 4px; box-shadow: inset 0 0 20px #111; }
+        .results-info { color: var(--gold); font-size: 14px; margin-bottom: 10px; border-right: 3px solid var(--gold); padding-right: 10px; }
         
-        .file-upload { margin-bottom: 15px; color: var(--neon); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; border: 1px solid #333; }
+        th { background: var(--army); color: #fff; padding: 12px; border: 1px solid #333; font-size: 14px; }
+        td { padding: 10px; border: 1px solid #222; text-align: center; font-size: 13px; color: #ccc; }
+        tr:nth-child(even) { background: #151515; }
+        tr:hover { background: #222; color: var(--gold); cursor: crosshair; }
+
+        .loading { display: none; color: var(--gold); font-style: italic; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <div class="login-box">
-        <h1 style="color: var(--neon);">AL-HAMID INTELLIGENCE</h1>
-        <p>نظام أرشفة البيانات الكبرى</p>
-        <input type="password" id="pass-input" placeholder="أدخل كلمة السر">
-        <br><br>
-        <button onclick="checkPass()">دخول المنظومة</button>
+<div id="lock-screen">
+    <div class="lock-box">
+        <h2 style="color: var(--army); margin-bottom: 5px;">RESTRICTED ACCESS</h2>
+        <p style="font-size: 12px; color: #666; margin-bottom: 30px;">AUTHORIZATION REQUIRED</p>
+        <input type="password" id="pw" placeholder="ENTER CODE 2026">
+        <br>
+        <button onclick="unlock()">EXECUTE</button>
     </div>
 </div>
 
-<div id="main-system">
+<div id="app-content">
     <div class="header">
-        <h1>محرك البحث الاستخباري - 2026</h1>
+        <h1 style="color: var(--army); margin: 0;">DATA MANAGEMENT TERMINAL</h1>
+        <div class="status-tag">SECURE CONNECTION: ACTIVE</div>
     </div>
 
-    <div class="search-area">
-        <div class="file-upload">
-            <label>1. ارفع ملف قاعدة البيانات (sqlite.): </label>
-            <input type="file" id="dbfile">
+    <div class="console">
+        <div id="step1">
+            <p style="color: var(--gold);">[SYSTEM]: WAITING FOR DATABASE FILE (.SQLITE)...</p>
+            <input type="file" id="dbfile" style="width: auto; border: none; color: #fff;">
         </div>
-        <div id="search-controls" style="display:none;">
-            <label>2. ابحث في البيانات: </label>
-            <input type="text" id="search-input" placeholder="اكتب الاسم هنا..." style="width: 50%;">
-            <button onclick="executeSearch()">استعلام فوراً</button>
+
+        <div id="step2" style="display:none;">
+            <p class="results-info">QUERY ENGINE READY</p>
+            <input type="text" id="sq" placeholder="SEARCH IDENTIFIER..." style="width: 60%;" onkeydown="if(event.key==='Enter') runSearch()">
+            <button onclick="runSearch()">SEARCH</button>
+            <p id="loading" class="loading">SCANNING DATABASE RECORDS...</p>
         </div>
     </div>
 
-    <div id="results-count"></div>
-    <table id="results-table">
-        <thead><tr id="table-header"></tr></thead>
-        <tbody id="table-body"></tbody>
+    <table id="tbl">
+        <thead id="thd"></thead>
+        <tbody id="tbd"></tbody>
     </table>
 </div>
 
 <script>
     let db = null;
-
-    // التحقق من كلمة السر
-    function checkPass() {
-        const pass = document.getElementById('pass-input').value;
-        if (pass === "2026") {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-system').style.display = 'block';
-        } else {
-            alert("الشفرة خاطئة سيدي.");
-        }
+    function unlock() {
+        if(document.getElementById('pw').value === "2026") {
+            document.getElementById('lock-screen').style.display='none';
+            document.getElementById('app-content').style.display='block';
+        } else { alert("ACCESS DENIED: INVALID CODE"); }
     }
 
-    // محرك تحميل قاعدة البيانات
-    const fileInput = document.getElementById('dbfile');
-    fileInput.onchange = function() {
-        const f = fileInput.files[0];
-        const r = new FileReader();
-        r.onload = function() {
-            const Uint8array = new Uint8Array(r.result);
-            initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` }).then(function(SQL){
-                db = new SQL.Database(Uint8array);
-                document.getElementById('search-controls').style.display = 'block';
-                alert("تم تحميل الـ 45 مليون اسم بنجاح. جاهز للبحث.");
+    const fin = document.getElementById('dbfile');
+    fin.onchange = function() {
+        const reader = new FileReader();
+        reader.onload = function() {
+            initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${f}` }).then(SQL => {
+                db = new SQL.Database(new Uint8Array(reader.result));
+                document.getElementById('step1').style.display='none';
+                document.getElementById('step2').style.display='block';
             });
         }
-        r.readAsArrayBuffer(f);
+        reader.readAsArrayBuffer(fin.files[0]);
     }
 
-    // محرك البحث
-    function executeSearch() {
-        if (!db) return;
-        const queryTerm = document.getElementById('search-input').value;
+    function runSearch() {
+        if(!db) return;
+        const q = document.getElementById('sq').value;
+        if(!q) return;
         
-        // جلب اسم الجدول الأول تلقائياً
-        const res = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
-        const tableName = res[0].values[0][0];
-
-        // تنفيذ الاستعلام (البحث في أول عمود)
-        const searchRes = db.exec(`SELECT * FROM ${tableName} LIMIT 500`); // هنا يمكنك إضافة WHERE للفلترة
-        
-        renderTable(searchRes[0]);
-    }
-
-    function renderTable(data) {
-        const header = document.getElementById('table-header');
-        const body = document.getElementById('table-body');
-        header.innerHTML = "";
-        body.innerHTML = "";
-
-        // العناوين
-        data.columns.forEach(col => {
-            header.innerHTML += `<th>${col}</th>`;
-        });
-
-        // الصفوف
-        data.values.forEach(row => {
-            let tr = "<tr>";
-            row.forEach(cell => { tr += `<td>${cell || ''}</td>`; });
-            tr += "</tr>";
-            body.innerHTML += tr;
-        });
-        
-        document.getElementById('results-count').innerText = `تم عرض أول ${data.values.length} نتيجة من القاعدة.`;
+        document.getElementById('loading').style.display='block';
+        setTimeout(() => {
+            try {
+                const tInfo = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' LIMIT 1")[0];
+                const t = tInfo.values[0][0];
+                const cols = db.exec(`PRAGMA table_info(${t})`)[0].values.map(c => c[1]);
+                
+                // البحث في أول 4 أعمدة لضمان الشمولية (الاسم، اللقب، الأب، الجد)
+                let where = cols.slice(0, 4).map(c => `${c} LIKE '%${q}%'`).join(" OR ");
+                const res = db.exec(`SELECT * FROM ${t} WHERE ${where} LIMIT 100`);
+                
+                const head = document.getElementById('thd');
+                const body = document.getElementById('tbd');
+                head.innerHTML = "<tr>" + cols.map(c => `<th>${c}</th>`).join("") + "</tr>";
+                body.innerHTML = res[0] ? res[0].values.map(r => "<tr>" + r.map(v => `<td>${v||'-'}</td>`).join("") + "</tr>").join("") : "<tr><td colspan='"+cols.length+"'>NO MATCHING RECORDS FOUND</td></tr>";
+            } catch(e) { alert("ERROR: DB STRUCTURE MISMATCH"); }
+            document.getElementById('loading').style.display='none';
+        }, 50);
     }
 </script>
 </body>
