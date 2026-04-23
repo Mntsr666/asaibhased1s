@@ -2,145 +2,158 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>النظام الأمني الموحد - مديرية مرور ميسان</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قاعدة البيانات المحمية</title>
     <style>
-        :root { --ink-blue: #003399; --stamp-red: #b71c1c; --stamp-blue: #0d47a1; }
-        body { font-family: 'Times New Roman', Times, serif; background: #333; margin: 0; padding: 20px; }
-        .no-print { background: #eee; padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f7; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
         
-        /* تصميم الورقة A4 */
-        .a4-page { 
-            background: white; width: 210mm; min-height: 297mm; padding: 15mm; margin: auto; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.8); position: relative; color: black; box-sizing: border-box;
-        }
+        /* نظام القفل */
+        #loginScreen { text-align: center; }
+        #mainContent { display: none; }
 
-        /* تنسيق الهيدر */
-        .header { display: flex; justify-content: space-between; border-bottom: 2px solid black; padding-bottom: 10px; }
-        .header div { width: 33%; }
-        .title-box { text-align: center; font-size: 22px; font-weight: bold; text-decoration: underline; margin: 20px 0; }
-
-        /* الجداول الرسمية */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        table, th, td { border: 1px solid black; padding: 8px; font-size: 16px; text-align: center; }
-        .label-cell { background: #f2f2f2; font-weight: bold; width: 25%; }
-
-        /* الأختام البرمجية بدقة عالية */
-        .seal-wrap { position: absolute; bottom: 80px; text-align: center; }
-        .stamp-blue { 
-            width: 140px; height: 140px; border: 4px double var(--stamp-blue); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; color: var(--stamp-blue);
-            font-size: 11px; font-weight: bold; transform: rotate(-15deg); opacity: 0.8; line-height: 1.2;
-        }
-        .stamp-rect {
-            border: 3px solid var(--stamp-blue); padding: 5px 15px; color: var(--stamp-blue);
-            font-weight: bold; transform: rotate(5deg); display: inline-block;
-        }
-
-        /* إخفاء واجهة التحكم عند الطباعة */
-        @media print { .no-print { display: none; } .a4-page { box-shadow: none; margin: 0; border: none; } }
+        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; outline: none; transition: 0.3s; }
+        input:focus { border-color: #3498db; box-shadow: 0 0 5px rgba(52,152,219,0.3); }
+        
+        .btn-main { background-color: #3498db; color: white; border: none; cursor: pointer; font-weight: bold; }
+        .btn-main:hover { background-color: #2980b9; }
+        
+        .file-input-wrapper { background: #f9f9f9; padding: 10px; border: 2px dashed #bbb; border-radius: 8px; text-align: center; cursor: pointer; }
+        
+        .item { background: #fff; border-bottom: 1px solid #eee; padding: 15px; display: flex; flex-direction: column; gap: 5px; position: relative; }
+        .item:last-child { border-bottom: none; }
+        .delete-btn { width: auto; background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; align-self: flex-end; }
+        
+        .file-link { color: #3498db; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="no-print">
-    <h2 style="color:#1a237e">نظام صناعة الوثائق الأمنية - نسخة مسؤول الحاسبة</h2>
-    <div style="margin-bottom:10px;">
-        <select id="docType" style="padding:10px; font-size:16px;">
-            <option value="rebuild">تصريحة رسم إعادة إعمار (1327)</option>
-            <option value="manifest">منيفست النقل البري (1328)</option>
-            <option value="receipt">وصل قبض إيرادات حكومية (1326)</option>
-        </select>
-        <input type="text" id="vinInput" placeholder="أدخل رقم الشاصي..." style="padding:10px; width:300px;">
-        <button onclick="buildDocument()" style="padding:10px 20px; background:#1a237e; color:white; border:none; cursor:pointer; font-weight:bold;">توليد الورقة الآن</button>
+<div class="container">
+    <div id="loginScreen">
+        <h2>🔒 النظام محمي</h2>
+        <input type="password" id="passInput" placeholder="أدخل كلمة المرور الخاصة بك...">
+        <button class="btn-main" onclick="checkPassword()">دخول</button>
+        <p id="errorMsg" style="color: red; display: none;">كلمة المرور غير صحيحة!</p>
     </div>
-</div>
 
-<div class="a4-page" id="printableArea">
-    <div id="content">
-        <h3 style="text-align:center; color:#ccc; margin-top:200px;">يرجى اختيار نوع الوثيقة وإدخال البيانات للبدء</h3>
+    <div id="mainContent">
+        <h2>📂 إدارة البيانات والملفات</h2>
+        <input type="text" id="entryTitle" placeholder="عنوان البيانات (مثلاً: ملف العمل)...">
+        
+        <div class="file-input-wrapper">
+            <p>اضغط هنا لاختيار ملف (اختياري)</p>
+            <input type="file" id="fileInput" style="display: block;">
+        </div>
+
+        <button class="btn-main" onclick="saveEntry()">حفظ في القاعدة</button>
+
+        <div id="displayArea">
+            </div>
+        
+        <button onclick="logout()" style="background: #95a5a6; color: white; border: none; margin-top: 20px; cursor: pointer;">تسجيل خروج</button>
     </div>
 </div>
 
 <script>
-    const database = [
-        { 
-            vin: "L8YTH15A 7 LS090173", 
-            type: "دراجة نارية YY150-9", 
-            owner: "معرض بيت عاشور", 
-            ref: "2102264640133", 
-            engine: "152QMI200990173",
-            color: "Blue",
-            year: "2025",
-            customs_val: "810,000",
-            tax_val: "199,290"
-        }
-    ];
+    const MY_PASSWORD = "123"; // *** سيدي غير كلمة المرور من هنا ***
+    let db;
 
-    function buildDocument() {
-        const type = document.getElementById('docType').value;
-        const vin = document.getElementById('vinInput').value.trim();
-        const data = database.find(d => d.vin.includes(vin) || vin.includes(d.vin)) || database[0];
-        const content = document.getElementById('content');
+    // فتح قاعدة البيانات
+    const request = indexedDB.open("SecureStorageDB", 1);
+    request.onupgradeneeded = (e) => {
+        db = e.target.result;
+        db.createObjectStore("entries", { keyPath: "id", autoIncrement: true });
+    };
+    request.onsuccess = (e) => { db = e.target.result; };
 
-        if (type === 'rebuild') {
-            content.innerHTML = `
-                <div class="header">
-                    <div>جمهورية العراق<br>وزارة المالية<br>الهيئة العامة للكمارك</div>
-                    <div style="text-align:center"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e3/Coat_of_arms_of_Iraq.svg" width="60"></div>
-                    <div style="text-align:left">التاريخ: 2026/04/23<br>الرقم: 23362<br>التصريحة: ${data.ref}</div>
-                </div>
-                <div class="title-box">تصريحة رسم إعادة الإعمار</div>
-                <table>
-                    <tr><td class="label-cell">المرسل / المستورد</td><td colspan="3">${data.owner}</td></tr>
-                    <tr><td class="label-cell">نوع الدراجة</td><td>${data.type}</td><td class="label-cell">سنة الصنع</td><td>${data.year}</td></tr>
-                    <tr><td class="label-cell">رقم الشاصي</td><td style="font-weight:bold">${data.vin}</td><td class="label-cell">اللون</td><td>${data.color}</td></tr>
-                </table>
-                <div class="title-box" style="font-size:18px; text-decoration:none;">تفاصيل التسديد المالي</div>
-                <table>
-                    <tr class="label-cell"><td>البيان</td><td>المبلغ المستحق</td><td>رقم الوصل</td></tr>
-                    <tr><td>رسم إعادة الإعمار</td><td>${data.customs_val}</td><td>5376737</td></tr>
-                    <tr><td>الضريبة (د.ع)</td><td>${data.tax_val}</td><td>2107144</td></tr>
-                </table>
-                <div class="seal-wrap" style="left:50px;">
-                    <div class="stamp-blue">مديرية كمرك ميسان<br>مكتب حاسبة الأقراص<br>مـصـدق</div>
-                </div>
-                <div class="seal-wrap" style="right:50px; bottom:150px;">
-                    <div class="stamp-rect">معرض بيت عاشور</div>
-                </div>
-            `;
-        } else if (type === 'manifest') {
-            content.innerHTML = `
-                <div class="header">
-                    <div>وزارة النقل<br>الشركة العامة للنقل البري</div>
-                    <div style="text-align:center"><strong>Manifest of automated entry</strong></div>
-                    <div style="text-align:left">No: J4-004309</div>
-                </div>
-                <div class="title-box">منيفست إدخال المركبات / الإمارات - العراق</div>
-                <table>
-                    <tr><td class="label-cell">Driver Name</td><td>أحمد جاسم محمد</td><td class="label-cell">Vehicle No</td><td>532920</td></tr>
-                    <tr><td class="label-cell">Origin</td><td>UAE</td><td class="label-cell">Send To</td><td>العراق / ميسان</td></tr>
-                </table>
-                <div style="margin-top:20px; text-align:center">
-                    <img src="https://www.barcodelookup.com/assets/images/barcode-sample.jpg" width="300"><br>
-                    <span>* ${data.vin} *</span>
-                </div>
-            `;
-        } else if (type === 'receipt') {
-            content.innerHTML = `
-                <div style="border:2px solid black; padding:10px;">
-                    <div style="text-align:center; font-weight:bold; font-size:20px;">وصل قبض إيرادات الحكومة (ط 5 / م)</div>
-                    <p style="text-align:left">الرقم: 5376737</p>
-                    <table>
-                        <tr class="label-cell"><td>البيان</td><td>المبلغ (دينار)</td></tr>
-                        <tr><td>رسوم تسجيل دراجة نارية</td><td>82,125</td></tr>
-                        <tr><td>رسم طابع</td><td>1,000</td></tr>
-                        <tr><td><strong>المجموع الكلي</strong></td><td><strong>83,125</strong></td></tr>
-                    </table>
-                    <div style="margin-top:40px; text-align:right;">توقيع أمين الصندوق: ________________</div>
-                </div>
-            `;
+    // التحقق من كلمة المرور
+    function checkPassword() {
+        const input = document.getElementById("passInput").value;
+        if (input === MY_PASSWORD) {
+            document.getElementById("loginScreen").display = "none";
+            document.getElementById("loginScreen").style.display = "none";
+            document.getElementById("mainContent").style.display = "block";
+            loadData();
+        } else {
+            document.getElementById("errorMsg").style.display = "block";
         }
     }
+
+    // حفظ البيانات مع الملف
+    function saveEntry() {
+        const title = document.getElementById("entryTitle").value;
+        const fileElement = document.getElementById("fileInput");
+        const file = fileElement.files[0];
+
+        if (!title) return alert("يرجى إدخال العنوان");
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const transaction = db.transaction(["entries"], "readwrite");
+            const store = transaction.objectStore("entries");
+            
+            const entry = {
+                title: title,
+                fileName: file ? file.name : null,
+                fileData: file ? event.target.result : null, // يتم حفظ الملف كنص مشفر Base64
+                date: new Date().toLocaleString()
+            };
+
+            store.add(entry);
+            transaction.oncomplete = () => {
+                alert("تم الحفظ بنجاح سيدي");
+                document.getElementById("entryTitle").value = "";
+                fileElement.value = "";
+                loadData();
+            };
+        };
+
+        if (file) {
+            reader.readAsDataURL(file); // قراءة الملف لتحويله لبيانات قابلة للتخزين
+        } else {
+            // إذا لم يوجد ملف، احفظ العنوان فقط
+            reader.onload({target: {result: null}});
+        }
+    }
+
+    // تحميل وعرض البيانات
+    function loadData() {
+        const displayArea = document.getElementById("displayArea");
+        displayArea.innerHTML = "<h3 style='margin-top:20px;'>السجلات الحالية:</h3>";
+
+        const store = db.transaction("entries").objectStore("entries");
+        store.openCursor().onsuccess = (e) => {
+            const cursor = e.target.result;
+            if (cursor) {
+                const item = cursor.value;
+                let fileHTML = item.fileName ? `<a class="file-link" href="${item.fileData}" download="${item.fileName}">⬇️ تحميل: ${item.fileName}</a>` : "لا يوجد ملف مرفق";
+                
+                displayArea.innerHTML += `
+                    <div class="item">
+                        <strong>📌 ${item.title}</strong>
+                        <small>التاريخ: ${item.date}</small>
+                        ${fileHTML}
+                        <button class="delete-btn" onclick="deleteEntry(${item.id})">حذف السجل</button>
+                    </div>`;
+                cursor.continue();
+            }
+        };
+    }
+
+    function deleteEntry(id) {
+        if(confirm("هل أنت متأكد من الحذف سيدي؟")) {
+            const transaction = db.transaction(["entries"], "readwrite");
+            transaction.objectStore("entries").delete(id);
+            transaction.oncomplete = () => loadData();
+        }
+    }
+
+    function logout() {
+        location.reload();
+    }
 </script>
+
 </body>
 </html>
