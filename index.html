@@ -2,263 +2,136 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>SOVEREIGN SOUTH: GLOBAL DOMINATION</title>
+    <title>منظومة آل حميد - الوصول المركز</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
     <style>
-        /* الجزء الأول: التصميم الاحترافي والواجهات السينمائية */
-        :root {
-            --gold: #d4af37; --red: #ff4d4d; --green: #2ecc71;
-            --dark-core: #050505; --panel: #111; --ui-glow: rgba(212, 175, 55, 0.3);
-        }
-        body, html { margin: 0; padding: 0; overflow: hidden; background: var(--dark-core); font-family: 'Cairo', sans-serif; color: white; }
+        :root { --neon: #00ff41; --bg: #050505; --panel: #111; }
+        body { background: var(--bg); color: #fff; font-family: 'Tahoma', sans-serif; margin: 0; overflow-x: hidden; }
         
-        /* واجهة التحميل والموسيقى */
-        #loader { 
-            position: fixed; inset: 0; background: black; z-index: 9999; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .start-btn { 
-            padding: 20px 50px; font-size: 24px; background: var(--gold); 
-            border: none; cursor: pointer; font-weight: bold; border-radius: 50px;
-            box-shadow: 0 0 30px var(--gold);
-        }
+        /* واجهة الدخول */
+        #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { border: 1px solid var(--neon); padding: 40px; text-align: center; box-shadow: 0 0 20px rgba(0,255,65,0.2); border-radius: 5px; }
+        
+        /* واجهة النظام */
+        #main-system { display: none; padding: 20px; }
+        .header { border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 20px; text-shadow: 0 0 10px var(--neon); }
+        
+        input, button { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 4px; outline: none; }
+        input:focus { border-color: var(--neon); }
+        button { background: var(--neon); color: black; font-weight: bold; cursor: pointer; border: none; }
+        button:hover { background: #00cc33; }
 
-        /* شريط الموارد العلوي (HUD) */
-        header {
-            height: 70px; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--gold);
-            display: flex; justify-content: space-between; align-items: center; padding: 0 20px;
-            box-shadow: 0 5px 20px black; position: relative; z-index: 100;
-        }
-        .res-item { background: #222; padding: 5px 15px; border: 1px solid #444; border-radius: 5px; margin: 0 5px; }
-        .res-item span { color: var(--gold); font-weight: bold; }
-
-        /* منطقة الخريطة العالمية الكاملة */
-        #game-viewport {
-            width: 100vw; height: calc(100vh - 70px); position: relative;
-            background: #001219; overflow: auto;
-        }
-        #world-map-svg {
-            width: 2500px; height: 1200px; filter: drop-shadow(0 0 10px rgba(0,0,0,1));
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        path { 
-            fill: #222; stroke: #444; stroke-width: 0.8; cursor: pointer; transition: 0.3s; 
-        }
-        path:hover { fill: var(--gold) !important; filter: brightness(1.2); }
-        .owned { fill: #005f73 !important; stroke: #0a9396 !important; stroke-width: 1.5; }
-        .hostile { fill: #ae2012 !important; }
-
-        /* القائمة الجانبية (الأوامر والوزراء) */
-        #side-panel {
-            position: fixed; left: -400px; top: 70px; width: 380px; height: 100%;
-            background: rgba(10, 10, 10, 0.95); border-right: 2px solid var(--gold);
-            transition: 0.5s; z-index: 500; display: flex; flex-direction: column;
-        }
-        #side-panel.active { left: 0; }
-        .panel-tab {
-            position: absolute; right: -50px; top: 100px; width: 50px; height: 150px;
-            background: var(--gold); color: black; writing-mode: vertical-rl;
-            text-align: center; font-weight: bold; cursor: pointer; border-radius: 0 10px 10px 0;
-        }
-
-        /* نظام الإعدادات */
-        #settings-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
-            display: none; align-items: center; justify-content: center;
-        }
-        .settings-box { 
-            width: 500px; background: #111; border: 2px solid var(--gold); padding: 30px; border-radius: 15px;
-        }
-
-        /* نظام الذكاء الاصطناعي (Log) */
-        #ai-console {
-            position: fixed; bottom: 20px; right: 20px; width: 350px; height: 180px;
-            background: rgba(0,0,0,0.8); border: 1px solid #333; font-family: monospace;
-            font-size: 11px; padding: 10px; color: #0f0; overflow-y: auto; z-index: 1000;
-        }
+        .search-area { background: var(--panel); padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #222; color: var(--neon); padding: 12px; text-align: right; border-bottom: 2px solid #333; }
+        td { padding: 10px; border-bottom: 1px solid #222; font-size: 13px; }
+        tr:hover { background: #1a1a1a; }
+        
+        .file-upload { margin-bottom: 15px; color: var(--neon); }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <h1 style="color:var(--gold); font-size: 60px;">SOVEREIGN SOUTH</h1>
-        <p>نظام محاكاة الحرب العالمية v3.0</p>
-        <button class="start-btn" onclick="Engine.init()">بدء التشغيل وتفعيل الأنظمة</button>
+<div id="login-screen">
+    <div class="login-box">
+        <h1 style="color: var(--neon);">AL-HAMID INTELLIGENCE</h1>
+        <p>نظام أرشفة البيانات الكبرى</p>
+        <input type="password" id="pass-input" placeholder="أدخل كلمة السر">
+        <br><br>
+        <button onclick="checkPass()">دخول المنظومة</button>
+    </div>
+</div>
+
+<div id="main-system">
+    <div class="header">
+        <h1>محرك البحث الاستخباري - 2026</h1>
     </div>
 
-    <header>
-        <div style="display:flex;">
-            <div class="res-item">💰 الميزانية: <span id="stat-money">100.0M</span></div>
-            <div class="res-item">🛢️ الإنتاج: <span id="stat-oil">50,000</span></div>
-            <div class="res-item">⚔️ الجيش: <span id="stat-army">2,000,000</span></div>
+    <div class="search-area">
+        <div class="file-upload">
+            <label>1. ارفع ملف قاعدة البيانات (sqlite.): </label>
+            <input type="file" id="dbfile">
         </div>
-        <div style="font-size: 24px; font-weight: bold; color: var(--gold);">غرفة العمليات المركزية</div>
-        <div style="display:flex;">
-            <button onclick="Engine.toggleSettings()" style="background:none; border:1px solid var(--gold); color:white; padding:5px 15px; cursor:pointer;">الإعدادات ⚙️</button>
-            <div class="res-item">📅 <span id="stat-date">2026-04-24</span></div>
-        </div>
-    </header>
-
-    <main id="game-viewport">
-        <svg id="world-map-svg" viewBox="0 0 1000 500">
-            <g id="map-layers"></g>
-        </svg>
-    </main>
-
-    <div id="side-panel">
-        <div class="panel-tab" onclick="Engine.togglePanel()">لوحة القيادة ◀</div>
-        <div style="padding: 20px;">
-            <h3>مجلس الوزراء السيادي</h3>
-            <div id="ministers-list"></div>
-            <hr>
-            <h3>الأوامر الإستراتيجية</h3>
-            <button class="start-btn" style="width:100%; font-size:16px; margin-bottom:10px;" onclick="Engine.war.mobilize()">تعبئة عامة (فتح الجبهة الثالثة)</button>
-            <button class="start-btn" style="width:100%; font-size:16px; background:#444;" onclick="Engine.economy.drill()">بناء منشأة نفطية</button>
-            <button class="start-btn" style="width:100%; font-size:16px; background:darkred;" onclick="Engine.war.nuclear()">تفعيل الردع النووي</button>
+        <div id="search-controls" style="display:none;">
+            <label>2. ابحث في البيانات: </label>
+            <input type="text" id="search-input" placeholder="اكتب الاسم هنا..." style="width: 50%;">
+            <button onclick="executeSearch()">استعلام فوراً</button>
         </div>
     </div>
 
-    <div id="ai-console"></div>
+    <div id="results-count"></div>
+    <table id="results-table">
+        <thead><tr id="table-header"></tr></thead>
+        <tbody id="table-body"></tbody>
+    </table>
+</div>
 
-    <div id="settings-modal">
-        <div class="settings-box">
-            <h2>إعدادات النظام</h2>
-            <label>مستوى الموسيقى: <input type="range" id="vol-music" onchange="Engine.audio.setVol()"></label><br><br>
-            <label>سرعة المحاكاة: 
-                <select id="game-speed">
-                    <option value="1000">واقعي (1 ثانية/يوم)</option>
-                    <option value="500">سريع</option>
-                    <option value="100">فائق السرعة</option>
-                </select>
-            </label><br><br>
-            <button class="start-btn" style="width:100%;" onclick="Engine.toggleSettings()">حفظ وإغلاق</button>
-        </div>
-    </div>
+<script>
+    let db = null;
 
-    <audio id="bg-music" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-    </audio>
+    // التحقق من كلمة السر
+    function checkPass() {
+        const pass = document.getElementById('pass-input').value;
+        if (pass === "2026") {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-system').style.display = 'block';
+        } else {
+            alert("الشفرة خاطئة سيدي.");
+        }
+    }
 
-    <script>
-        /* المحرك الإمبراطوري العظيم - 2000+ خط منطقي مدمج */
-        const Engine = {
-            state: {
-                money: 100000000, oil: 50000, army: 2000000, stability: 100,
-                day: 1, ministers: [], worldData: {}
-            },
+    // محرك تحميل قاعدة البيانات
+    const fileInput = document.getElementById('dbfile');
+    fileInput.onchange = function() {
+        const f = fileInput.files[0];
+        const r = new FileReader();
+        r.onload = function() {
+            const Uint8array = new Uint8Array(r.result);
+            initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` }).then(function(SQL){
+                db = new SQL.Database(Uint8array);
+                document.getElementById('search-controls').style.display = 'block';
+                alert("تم تحميل الـ 45 مليون اسم بنجاح. جاهز للبحث.");
+            });
+        }
+        r.readAsArrayBuffer(f);
+    }
 
-            init() {
-                document.getElementById('loader').style.display = 'none';
-                this.audio.play();
-                this.map.generate();
-                this.politics.setup();
-                this.runLoop();
-                this.ai.log("نظام القيادة مفعل. تم رصد 200 دولة على الرادار العالمي.");
-            },
+    // محرك البحث
+    function executeSearch() {
+        if (!db) return;
+        const queryTerm = document.getElementById('search-input').value;
+        
+        // جلب اسم الجدول الأول تلقائياً
+        const res = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
+        const tableName = res[0].values[0][0];
 
-            // محرك الخريطة الكاملة
-            map: {
-                generate() {
-                    const layers = document.getElementById('map-layers');
-                    // توليد شبكة دول افتراضية تغطي مساحة العالم SVG بالكامل
-                    for(let i=0; i<15; i++) {
-                        for(let j=0; j<10; j++) {
-                            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                            const x = i * 65; const y = j * 50;
-                            path.setAttribute("d", `M${x},${y} L${x+60},${y} L${x+60},${y+45} L${x},${y+45} Z`);
-                            path.id = `COUNTRY_${i}_${j}`;
-                            path.onclick = () => Engine.selectCountry(path.id);
-                            if(i===8 && j===4) path.className = "owned"; // مقر القيادة (العراق)
-                            layers.appendChild(path);
-                        }
-                    }
-                }
-            },
+        // تنفيذ الاستعلام (البحث في أول عمود)
+        const searchRes = db.exec(`SELECT * FROM ${tableName} LIMIT 500`); // هنا يمكنك إضافة WHERE للفلترة
+        
+        renderTable(searchRes[0]);
+    }
 
-            // محرك الصوت
-            audio: {
-                play() { document.getElementById('bg-music').play(); },
-                setVol() { 
-                    const v = document.getElementById('vol-music').value / 100;
-                    document.getElementById('bg-music').volume = v;
-                }
-            },
+    function renderTable(data) {
+        const header = document.getElementById('table-header');
+        const body = document.getElementById('table-body');
+        header.innerHTML = "";
+        body.innerHTML = "";
 
-            // نظام الذكاء الاصطناعي
-            ai: {
-                log(msg) {
-                    const console = document.getElementById('ai-console');
-                    console.innerHTML = `> [${new Date().toLocaleTimeString()}] ${msg}<br>` + console.innerHTML;
-                }
-            },
+        // العناوين
+        data.columns.forEach(col => {
+            header.innerHTML += `<th>${col}</th>`;
+        });
 
-            // نظام السياسة والوزراء
-            politics: {
-                setup() {
-                    const list = document.getElementById('ministers-list');
-                    const roles = ["وزير الدفاع العالمي", "وزير الطاقة والنفط", "رئيس الاستخبارات"];
-                    roles.forEach(role => {
-                        const div = document.createElement('div');
-                        div.style = "background:#222; padding:10px; margin:5px 0; border-right:3px solid gold;";
-                        div.innerHTML = `<strong>${role}</strong><br><small>الولاء: 100%</small>`;
-                        list.appendChild(div);
-                    });
-                }
-            },
-
-            // العمليات العسكرية
-            war: {
-                mobilize() {
-                    if(Engine.state.money >= 10000000) {
-                        Engine.state.money -= 10000000;
-                        Engine.state.army += 500000;
-                        Engine.ai.log("تم فتح جبهة قتال ثالثة.. استدعاء قوات الاحتياط.");
-                    }
-                },
-                nuclear() {
-                    Engine.ai.log("تحذير: تم تفعيل شيفرات الردع النووي.. العالم في حالة ترقب!", true);
-                }
-            },
-
-            // المحرك الاقتصادي
-            economy: {
-                drill() {
-                    Engine.state.money -= 5000000;
-                    Engine.state.oil += 5000;
-                    Engine.ai.log("تم بناء مجمع نفطي جديد.. زيادة الإنتاج القومي.");
-                }
-            },
-
-            // الوظائف العامة
-            togglePanel() { document.getElementById('side-panel').classList.toggle('active'); },
-            toggleSettings() {
-                const s = document.getElementById('settings-modal').style;
-                s.display = (s.display === 'flex') ? 'none' : 'flex';
-            },
-
-            selectCountry(id) {
-                Engine.ai.log(`تم تحديد الإقليم ${id}. جاري تحليل الثروات والقدرات الدفاعية.`);
-                document.getElementById(id).style.fill = "orange";
-            },
-
-            runLoop() {
-                setInterval(() => {
-                    const speed = parseInt(document.getElementById('game-speed').value);
-                    Engine.state.day++;
-                    // الاقتصاد
-                    Engine.state.money += (Engine.state.oil * 100) - (Engine.state.army * 0.5);
-                    
-                    // التحديث
-                    document.getElementById('stat-money').innerText = (Engine.state.money / 1000000).toFixed(1) + "M";
-                    document.getElementById('stat-oil').innerText = Engine.state.oil.toLocaleString();
-                    document.getElementById('stat-army').innerText = Engine.state.army.toLocaleString();
-                    
-                    if(Engine.state.day % 30 === 0) Engine.ai.log("تقرير شهري: الاقتصاد العالمي يشهد تقلبات حادة.");
-                }, 1000);
-            }
-        };
-
-        // منع الخروج من اللعبة بدون حفظ
-        window.onbeforeunload = () => "سيدي، هل أنت متأكد من مغادرة غرفة القيادة؟";
-    </script>
+        // الصفوف
+        data.values.forEach(row => {
+            let tr = "<tr>";
+            row.forEach(cell => { tr += `<td>${cell || ''}</td>`; });
+            tr += "</tr>";
+            body.innerHTML += tr;
+        });
+        
+        document.getElementById('results-count').innerText = `تم عرض أول ${data.values.length} نتيجة من القاعدة.`;
+    }
+</script>
 </body>
 </html>
