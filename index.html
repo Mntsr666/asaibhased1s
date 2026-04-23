@@ -2,354 +2,206 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>هوار الجنوب: السيادة المطلقة | 2000 Lines Logic</title>
+    <title>إمبراطورية الجنوب: سيادة العالم</title>
     <style>
-        /* الجزء الأول: التصميم الاحترافي (CSS) - حوالي 200 سطر */
-        :root {
-            --primary: #0f172a; --secondary: #1e293b; --accent: #0ea5e9;
-            --danger: #ef4444; --success: #22c55e; --warning: #f59e0b;
-            --ai-color: #8b5cf6; --text: #f8fafc;
-        }
-        * { box-sizing: border-box; transition: all 0.2s ease; }
-        body {
-            background-color: var(--primary); color: var(--text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
-        }
-
-        /* واجهة المعلومات العلوية */
-        header {
-            background: var(--secondary); padding: 10px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 2px solid var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        .stat-box { display: flex; gap: 20px; }
-        .stat-item { background: #000; padding: 5px 15px; border-radius: 5px; border-left: 3px solid var(--accent); }
-        .stat-item.money { border-left-color: var(--success); }
-        .stat-item.oil { border-left-color: var(--warning); }
-
-        /* تقسيم الشاشة */
-        main { display: grid; grid-template-columns: 350px 1fr 350px; flex: 1; overflow: hidden; }
-
-        /* الأجنحة الجانبية */
-        .sidebar { background: var(--secondary); border: 1px solid #334155; display: flex; flex-direction: column; overflow-y: auto; }
-        .panel-header { background: #334155; padding: 10px; font-weight: bold; text-align: center; border-bottom: 1px solid var(--accent); }
+        :root { --dark: #020617; --gold: #d4af37; --war: #991b1b; --ui: #1e293b; }
+        body { background: var(--dark); color: white; font-family: 'Cairo', sans-serif; margin: 0; overflow: hidden; }
         
-        /* نظام الخريطة */
-        #map-area { position: relative; background: radial-gradient(circle, #1e293b 0%, #0f172a 100%); overflow: hidden; }
-        .region {
-            position: absolute; border: 2px solid rgba(255,255,255,0.2); 
-            border-radius: 10px; cursor: pointer; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; font-weight: bold;
+        /* واجهة القيادة العليا */
+        #war-room-header {
+            height: 60px; background: linear-gradient(90deg, #0f172a, #1e293b);
+            display: flex; justify-content: space-around; align-items: center;
+            border-bottom: 2px solid var(--gold); box-shadow: 0 5px 20px rgba(0,0,0,0.8);
         }
-        .region:hover { border-color: var(--accent); box-shadow: 0 0 20px var(--accent); z-index: 10; }
-        .region.owned { background: rgba(14, 165, 233, 0.2); border-color: var(--accent); }
-        .region.enemy { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); }
+        .stat-group { display: flex; gap: 15px; font-weight: bold; }
+        .stat-card { background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 4px; border: 1px solid var(--gold); }
 
-        /* نظام الوزراء */
-        .minister-card {
-            background: #0f172a; margin: 10px; padding: 10px; border-radius: 8px;
-            border-right: 4px solid var(--ai-color);
+        /* خريطة العالم الاحترافية */
+        #world-map-container {
+            width: 100vw; height: calc(100vh - 300px); background: #0c4a6e;
+            position: relative; overflow: auto; cursor: grab;
         }
-        .minister-card.loyal { border-right-color: var(--success); }
-        .minister-card.rebel { border-right-color: var(--danger); }
+        svg#world-svg { width: 2000px; height: 1000px; transition: transform 0.3s; }
+        path { fill: #1e293b; stroke: #475569; stroke-width: 0.5; transition: 0.3s; cursor: pointer; }
+        path:hover { fill: var(--gold) !important; }
+        path.my-territory { fill: #0369a1 !important; stroke: #0ea5e9; }
+        path.enemy-territory { fill: #7f1d1d !important; stroke: #ef4444; }
 
-        /* صندوق الذكاء الاصطناعي (AI Console) */
-        #ai-console {
-            background: #000; color: #10b981; font-family: 'Consolas', monospace;
-            padding: 15px; height: 100%; font-size: 13px; overflow-y: auto; line-height: 1.5;
+        /* لوحة التحكم (الذكاء الاصطناعي والسياسة) */
+        #control-center {
+            height: 240px; background: var(--ui); display: grid;
+            grid-template-columns: 350px 1fr 350px; border-top: 3px solid var(--gold);
         }
-        .ai-msg { border-bottom: 1px solid #1e293b; padding: 5px 0; }
-        .ai-alert { color: var(--danger); font-weight: bold; }
-
-        /* نظام التبويبات والمستودع */
-        .tabs { display: flex; background: #000; }
-        .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; border-bottom: 2px solid transparent; }
-        .tab.active { border-bottom-color: var(--accent); background: var(--secondary); }
-
-        /* الأزرار */
-        .btn {
-            background: var(--accent); border: none; color: white; padding: 10px;
-            border-radius: 4px; cursor: pointer; width: 100%; margin-top: 5px;
+        .panel { padding: 15px; border-left: 1px solid #334155; overflow-y: auto; }
+        .log-area { background: #000; height: 150px; font-family: 'Consolas', monospace; font-size: 12px; padding: 10px; color: #4ade80; border: 1px solid #334155; }
+        
+        /* الأزرار العسكرية */
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .action-btn { 
+            background: #334155; border: 1px solid var(--gold); color: white; 
+            padding: 10px; cursor: pointer; border-radius: 5px; font-weight: bold;
         }
-        .btn:disabled { background: #475569; cursor: not-allowed; }
-        .btn-danger { background: var(--danger); }
+        .action-btn:hover { background: var(--gold); color: black; }
+        .btn-attack { background: var(--war); border-color: #ef4444; }
+
+        /* نافذة المعلومات السريعة */
+        #country-tooltip {
+            position: absolute; background: rgba(0,0,0,0.9); padding: 10px;
+            border-radius: 5px; border: 1px solid var(--gold); display: none; pointer-events: none;
+        }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="stat-box">
-        <div class="stat-item money">الخزينة: <span id="val-money">1,500,000</span> $</div>
-        <div class="stat-item oil">النفط: <span id="val-oil">1,000</span> برميل/ي</div>
-        <div class="stat-item army">القوات: <span id="val-army">25,000</span> جندي</div>
+<div id="war-room-header">
+    <div class="stat-group">
+        <div class="stat-card">💰 الخزينة: <span id="m-money">2.5M</span></div>
+        <div class="stat-card">🛢️ النفط: <span id="m-oil">5,000</span></div>
+        <div class="stat-card">🎖️ الهيبة: <span id="m-prestige">100</span></div>
     </div>
-    <div style="font-weight: bold; color: var(--accent);">هوار الجنوب: القيادة المركزية</div>
-    <div class="stat-box">
-        <div class="stat-item">الاستقرار: <span id="val-stability">100</span>%</div>
-        <div id="game-date">24 نيسان، 2026</div>
+    <div style="font-size: 20px; letter-spacing: 2px;">القيادة الاستراتيجية العالمية</div>
+    <div class="stat-group">
+        <div class="stat-card">⚔️ الجيش: <span id="m-army">150,000</span></div>
+        <div class="stat-card">🌍 اليوم: <span id="m-day">1</span></div>
     </div>
-</header>
+</div>
 
-<main>
-    <section class="sidebar">
-        <div class="panel-header">مجلس الوزراء والمستشارين</div>
-        <div id="ministers-list">
+<div id="world-map-container">
+    <div id="country-tooltip"></div>
+    <svg id="world-svg" viewBox="0 0 1000 500">
+        <path id="IRQ" title="العراق" d="M500,200 L520,200 L520,220 L500,220 Z" class="my-territory" onclick="world.select('IRQ')"></path>
+        <path id="EGY" title="مصر" d="M400,220 L430,220 L430,250 L400,250 Z" onclick="world.select('EGY')"></path>
+        <path id="USA" title="أمريكا" d="M100,150 L180,150 L180,220 L100,220 Z" onclick="world.select('USA')"></path>
+        <path id="CHN" title="الصين" d="M700,180 L800,180 L800,250 L700,250 Z" onclick="world.select('CHN')"></path>
+        <path id="RUS" title="روسيا" d="M600,50 L850,50 L850,150 L600,150 Z" onclick="world.select('RUS')"></path>
+        </svg>
+</div>
+
+<div id="control-center">
+    <div class="panel">
+        <h3>مجلس الوزراء (AI)</h3>
+        <p>وزير الدفاع: <span id="v-def">فريق ركن أحمد</span></p>
+        <p>وزير النفط: <span id="v-oil">د. جاسم</span></p>
+        <div class="btn-group">
+            <button class="action-btn" onclick="world.politics('appoint')">تعيين وزير</button>
+            <button class="action-btn" onclick="world.politics('bribe')">تقديم رشاوي سياسية</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3 id="target-name">اختر دولة لاحتلالها أو التفاوض معها</h3>
+        <div id="action-panel" style="display:none;">
+            <p>القوة العسكرية: <span id="target-power">???</span></p>
+            <div class="btn-group">
+                <button class="action-btn btn-attack" onclick="world.war('invasion')">شن غزو شامل</button>
+                <button class="action-btn" onclick="world.war('sabotage')">عملية تخريب (نفط)</button>
+                <button class="action-btn" onclick="world.politics('embassy')">فتح سفارة</button>
+                <button class="action-btn" onclick="world.war('nuke')">تهديد نووي</button>
             </div>
-        <div style="padding: 10px;">
-            <button class="btn" onclick="Game.politics.appointMinister()">تعيين وزير جديد (50k$)</button>
-            <button class="btn btn-danger" onclick="Game.politics.emergencyMeeting()">اجتماع طارئ للبرلمان</button>
         </div>
-        <div class="panel-header" style="margin-top:20px;">الميزانية الوطنية</div>
-        <div id="budget-info" style="padding: 10px; font-size: 14px;">
-            <p>رواتب الجيش: <span id="cost-army">0</span>$</p>
-            <p>صادرات النفط: <span id="income-oil">0</span>$</p>
-            <p>الضرائب: <span id="income-tax">0</span>$</p>
-        </div>
-    </section>
+    </div>
 
-    <section id="map-area">
-        <div id="map-ui" style="position:absolute; bottom:20px; left:20px; z-index:100; background:rgba(0,0,0,0.8); padding:15px; border-radius:10px; display:none;">
-            <h3 id="sel-region-name">إقليم نجد</h3>
-            <p id="sel-region-info">الحالة: محايد</p>
-            <button class="btn" onclick="Game.war.sendTroops()">إرسال فرقة عسكرية</button>
-            <button class="btn" style="background:#22c55e" onclick="Game.economy.buildOilWell()">بناء حقل نفط</button>
-            <button class="btn btn-danger" onclick="Game.politics.imposeSanctions()">فرض عقوبات سياسية</button>
+    <div class="panel">
+        <h3>مركز الاستخبارات</h3>
+        <div id="ai-log" class="log-area">
+            > جاري مسح الرادارات العالمية...<br>
+            > تم رصد تحركات عسكرية في منطقة الشمال.
         </div>
-    </section>
-
-    <section class="sidebar">
-        <div class="tabs">
-            <div class="tab active">الاستخبارات AI</div>
-            <div class="tab">السوق العالمي</div>
-        </div>
-        <div id="ai-console">
-            <div class="ai-msg">> جاري تحميل البروتوكولات الأمنية...</div>
-            <div class="ai-msg">> نظام الذكاء الاصطناعي جاهز سيدي.</div>
-        </div>
-        <div class="panel-header">أوامر استراتيجية</div>
-        <div style="padding: 10px;">
-            <button class="btn" onclick="Game.war.openThirdFront()">فتح الجبهة الثالثة (تجنيد عام)</button>
-            <button class="btn btn-danger" onclick="Game.economy.shutdownPort()">تعطيل الميناء الرئيسي</button>
-            <button class="btn" style="background:var(--ai-color)" onclick="Game.ai.runFullAnalysis()">تحليل AI للتهديدات</button>
-        </div>
-    </section>
-</main>
+    </div>
+</div>
 
 <script>
-    /* الجزء الثاني: المحرك البرمجي (JavaScript Engine) 
-       هذا الجزء يحتوي على منطق الـ 2000 سطر المختصرة في وظائف عميقة جداً
-    */
+/* المحرك الجيوسياسي - World Domination Engine */
+const world = {
+    state: {
+        money: 2500000,
+        oil: 5000,
+        army: 150000,
+        prestige: 100,
+        day: 1,
+        selectedCountry: null,
+        nukes: 0,
+        territories: ['IRQ']
+    },
 
-    const Game = {
-        // البيانات الأساسية
-        data: {
-            money: 1500000,
-            oil: 1000,
-            army: 25000,
-            stability: 100,
-            oilPrice: 75,
-            ministers: [],
-            regions: [],
-            selectedRegion: null,
-            day: 1,
-            isPortOpen: true
-        },
+    countriesData: {
+        'EGY': { name: 'جمهورية مصر', power: 80000, oil: 1000, status: 'محايد' },
+        'USA': { name: 'الولايات المتحدة', power: 1000000, oil: 20000, status: 'عدو' },
+        'CHN': { name: 'جمهورية الصين', power: 900000, oil: 15000, status: 'حليف' },
+        'RUS': { name: 'روسيا الاتحادية', power: 850000, oil: 30000, status: 'محايد' },
+        'IRQ': { name: 'العراق (المقر)', power: 150000, oil: 50000, status: 'الوطن' }
+    },
 
-        // نظام البدء (Initialization)
-        init: function() {
-            console.log("Starting Sovereign South Engine...");
-            this.map.generate();
-            this.politics.generateMinisters();
-            this.loop();
-            this.ai.log("تم تفعيل نظام القيادة والسيطرة بنجاح.");
-        },
+    init() {
+        this.log("نظام 'دوميناشن الجنوب' مفعل سيدي القائد.");
+        this.runLoop();
+    },
 
-        // نظام الخريطة (Map System)
-        map: {
-            generate: function() {
-                const mapArea = document.getElementById('map-area');
-                const regionsData = [
-                    { name: "مركز الجنوب", x: 400, y: 300, type: 'owned', oil: 500 },
-                    { name: "الميناء الشرقي", x: 600, y: 350, type: 'owned', oil: 200 },
-                    { name: "الصحراء الشمالية", x: 450, y: 100, type: 'neutral', oil: 1000 },
-                    { name: "أراضي العدو", x: 100, y: 150, type: 'enemy', oil: 0 },
-                    { name: "آبار الكبريت", x: 700, y: 100, type: 'neutral', oil: 300 }
-                ];
+    log(msg, type = 'info') {
+        const logArea = document.getElementById('ai-log');
+        const color = type === 'war' ? '#ef4444' : '#4ade80';
+        logArea.innerHTML = `<div style="color:${color}">> [D-${this.state.day}] ${msg}</div>` + logArea.innerHTML;
+    },
 
-                regionsData.forEach((r, index) => {
-                    const div = document.createElement('div');
-                    div.className = `region ${r.type}`;
-                    div.style.left = r.x + "px";
-                    div.style.top = r.y + "px";
-                    div.style.width = "120px";
-                    div.style.height = "100px";
-                    div.innerHTML = `<span>${r.name}</span><small>${r.type}</small>`;
-                    div.onclick = () => Game.map.select(index, r);
-                    mapArea.appendChild(div);
-                    Game.data.regions.push(r);
-                });
-            },
-            select: function(index, data) {
-                Game.data.selectedRegion = index;
-                const ui = document.getElementById('map-ui');
-                ui.style.display = 'block';
-                document.getElementById('sel-region-name').innerText = data.name;
-                document.getElementById('sel-region-info').innerText = `النفط المتوفر: ${data.oil} برميل`;
-                Game.ai.log(`تم تحديد إحداثيات الإقليم: ${data.name}`);
-            }
-        },
+    select(id) {
+        this.state.selectedCountry = id;
+        const c = this.countriesData[id];
+        document.getElementById('target-name').innerText = c.name;
+        document.getElementById('target-power').innerText = c.power.toLocaleString();
+        document.getElementById('action-panel').style.display = 'block';
+        this.log(`تم تحديد الهدف: ${c.name}. جاري حساب احتمالات النصر...`);
+    },
 
-        // نظام السياسة والوزراء (Politics System)
-        politics: {
-            generateMinisters: function() {
-                const names = ["د. عادل", "اللواء ناصر", "المهندس مكي"];
-                const roles = ["وزير النفط", "وزير الدفاع", "وزير المالية"];
-                names.forEach((name, i) => {
-                    this.createMinisterCard(name, roles[i]);
-                });
-            },
-            createMinisterCard: function(name, role) {
-                const list = document.getElementById('ministers-list');
-                const card = document.createElement('div');
-                card.className = 'minister-card loyal';
-                const loyalty = Math.floor(Math.random() * 40) + 60;
-                card.innerHTML = `
-                    <strong>${name}</strong><br>
-                    <small>${role}</small><br>
-                    الولاء: ${loyalty}% | الكفاءة: 85%
-                `;
-                list.appendChild(card);
-                Game.data.ministers.push({ name, role, loyalty });
-            },
-            appointMinister: function() {
-                if (Game.data.money >= 50000) {
-                    Game.data.money -= 50000;
-                    this.createMinisterCard("وزير جديد", "مستشار خاص");
-                    Game.ai.log("تم تعيين مستشار جديد لزيادة كفاءة الإدارة.");
-                }
-            },
-            emergencyMeeting: function() {
-                Game.data.stability += 5;
-                Game.ai.log("اجتماع برلماني طارئ.. تم امتصاص غضب الشارع.");
-            }
-        },
-
-        // نظام الاقتصاد (Economy System)
-        economy: {
-            buildOilWell: function() {
-                if (Game.data.money >= 200000) {
-                    Game.data.money -= 200000;
-                    Game.data.oil += 500;
-                    Game.ai.log("تم افتتاح حقل نفط جديد. الإنتاج يرتفع.");
+    war(type) {
+        const target = this.countriesData[this.state.selectedCountry];
+        if (type === 'invasion') {
+            this.log(`بدء عملية 'غزو الصاعقة' ضد ${target.name}...`, 'war');
+            setTimeout(() => {
+                if (this.state.army > target.power) {
+                    this.state.money += target.oil * 100;
+                    this.state.prestige += 20;
+                    document.getElementById(this.state.selectedCountry).classList.add('my-territory');
+                    this.log(`انتصار ساحق! تم ضم ${target.name} للإمبراطورية.`);
                 } else {
-                    Game.ai.log("عذراً سيدي، لا توجد سيولة كافية للبناء!", true);
+                    this.state.army -= 50000;
+                    this.state.prestige -= 30;
+                    this.log(`تراجع القوات! خسرنا 50 ألف جندي في معارك ${target.name}.`, 'war');
                 }
-            },
-            shutdownPort: function() {
-                Game.data.isPortOpen = !Game.data.isPortOpen;
-                Game.ai.log(Game.data.isPortOpen ? "تم إعادة فتح الميناء." : "تحذير: الميناء معطل، توقف التصدير!");
-            }
-        },
-
-        // نظام الحرب (War System)
-        war: {
-            sendTroops: function() {
-                if (Game.data.army >= 5000) {
-                    Game.data.army -= 1000;
-                    Game.ai.log("تم إرسال كتيبة استطلاع للإقليم المختار.");
-                    // منطق احتلال المنطقة
-                    setTimeout(() => {
-                        const r = Game.data.regions[Game.data.selectedRegion];
-                        if (Math.random() > 0.4) {
-                            r.type = 'owned';
-                            Game.ai.log(`انتصار! تمت السيطرة على ${r.name}`);
-                        } else {
-                            Game.ai.log(`تراجع تكتيكي في ${r.name} بسبب المقاومة.`, true);
-                        }
-                    }, 2000);
-                }
-            },
-            openThirdFront: function() {
-                Game.data.money -= 300000;
-                Game.data.army += 15000;
-                Game.ai.log("إعلان التعبئة العامة.. الجبهة الثالثة مفتوحة الآن.");
-            }
-        },
-
-        // نظام الذكاء الاصطناعي (AI Core)
-        ai: {
-            log: function(msg, isAlert = false) {
-                const console = document.getElementById('ai-console');
-                const div = document.createElement('div');
-                div.className = isAlert ? 'ai-msg ai-alert' : 'ai-msg';
-                div.innerText = `[${new Date().toLocaleTimeString()}] > ${msg}`;
-                console.insertBefore(div, console.firstChild);
-            },
-            runFullAnalysis: function() {
-                this.log("جاري فحص الثغرات الأمنية والاقتصادية...");
-                setTimeout(() => {
-                    if (Game.data.money < 500000) this.log("توصية AI: الميزانية حرجة، قم ببيع عقود نفط مستقبلية.", true);
-                    if (Game.data.stability < 70) this.log("توصية AI: الشعب يغلي، نحتاج لزيادة رواتب أو تعيين وزير محبوب.", true);
-                    this.log("التحليل المتقدم اكتمل.");
-                }, 1500);
-            },
-            randomEvents: function() {
-                // أحداث عشوائية يولدها الـ AI كل فترة
-                const r = Math.random();
-                if (r < 0.05) {
-                    Game.data.oilPrice += 10;
-                    this.log("حدث عالمي: انفجار في أنابيب الشمال.. سعر النفط يقفز!");
-                } else if (r < 0.08) {
-                    Game.data.stability -= 10;
-                    this.log("مظاهرات في العاصمة تطالب بتحسين الخدمات.", true);
-                }
-            }
-        },
-
-        // حلقة اللعبة الأساسية (The Engine Loop)
-        loop: function() {
-            setInterval(() => {
-                // 1. حساب الدخل
-                let income = 0;
-                if (Game.data.isPortOpen) income += (Game.data.oil * Game.data.oilPrice) / 100;
-                income += (Game.data.stability * 100); // ضرائب
-
-                // 2. حساب المصاريف
-                let expenses = (Game.data.army * 0.2); // رواتب
-                expenses += (Game.data.ministers.length * 1000); // رواتب وزراء
-
-                // 3. التحديث المالي
-                Game.data.money += (income - expenses);
-                
-                // 4. تحديث الواجهة
-                document.getElementById('val-money').innerText = Math.floor(Game.data.money).toLocaleString();
-                document.getElementById('val-oil').innerText = Game.data.oil;
-                document.getElementById('val-army').innerText = Game.data.army.toLocaleString();
-                document.getElementById('val-stability').innerText = Math.floor(Game.data.stability);
-                
-                document.getElementById('cost-army').innerText = Math.floor(expenses);
-                document.getElementById('income-oil').innerText = Math.floor(income);
-
-                // 5. محرك الأحداث
-                Game.ai.randomEvents();
-
-                if (Game.data.money < 0) {
-                    Game.data.stability -= 0.5;
-                    if(Game.data.stability < 20) {
-                        alert("انقلاب عسكري! لقد فقدت السيطرة على الدولة.");
-                        location.reload();
-                    }
-                }
-            }, 1000);
+            }, 2000);
         }
-    };
+    },
 
-    // تشغيل المحرك
-    window.onload = () => Game.init();
+    politics(action) {
+        if (action === 'appoint') {
+            this.state.money -= 100000;
+            this.log("تم تعيين وزير جديد بكفاءة عالية.");
+        }
+    },
 
+    runLoop() {
+        setInterval(() => {
+            this.state.day++;
+            // إنتاج النفط يولد مال
+            this.state.money += (this.state.oil * 10);
+            // رواتب الجيش تستهلك مال
+            this.state.money -= (this.state.army * 0.05);
+
+            // تحديث الأرقام
+            document.getElementById('m-money').innerText = Math.floor(this.state.money).toLocaleString();
+            document.getElementById('m-oil').innerText = this.state.oil.toLocaleString();
+            document.getElementById('m-army').innerText = this.state.army.toLocaleString();
+            document.getElementById('m-day').innerText = this.state.day;
+
+            // ذكاء اصطناعي عشوائي للعدو
+            if (this.state.day % 20 === 0) {
+                this.log("الذكاء الاصطناعي العالمي: أمريكا تفرض عقوبات اقتصادية عليك!", 'war');
+                this.state.money -= 500000;
+            }
+        }, 1000);
+    }
+};
+
+window.onload = () => world.init();
 </script>
-
 </body>
 </html>
