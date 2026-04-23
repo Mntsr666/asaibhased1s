@@ -3,205 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة معالجة المعلومات والبيانات</title>
+    <title>منظومة الأرشفة المركزية</title>
     <style>
-        :root { --main-bg: #0d1117; --card-bg: #161b22; --accent: #238636; --danger: #da3633; --text: #c9d1d9; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--main-bg); color: var(--text); margin: 0; padding: 10px; line-height: 1.6; }
-        .container { max-width: 1000px; margin: auto; }
+        :root { --bg: #0d1117; --card: #161b22; --accent: #238636; --text: #c9d1d9; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; }
+        .container { max-width: 800px; margin: auto; }
+        .form-box { background: var(--card); padding: 20px; border-radius: 10px; border: 1px solid #30363d; margin-bottom: 20px; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #0d1117; color: #fff; border: 1px solid #30363d; border-radius: 6px; box-sizing: border-box; }
         
-        .header { background: var(--card-bg); padding: 15px; border-radius: 8px; border-right: 5px solid var(--accent); margin-bottom: 20px; }
-        .header h1 { margin: 0; font-size: 22px; color: #fff; }
-
-        /* Stats */
-        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-        .stat-item { background: var(--card-bg); padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #30363d; }
-        .stat-item span { display: block; font-size: 24px; font-weight: bold; color: var(--accent); }
-
-        /* Form */
-        .data-form { background: var(--card-bg); padding: 20px; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border: 1px solid #30363d; }
-        input, select, textarea { background: #0d1117; color: white; border: 1px solid #30363d; padding: 12px; border-radius: 6px; outline: none; width: 100%; box-sizing: border-box; }
-        .full { grid-column: span 2; }
+        .upload-area { background: #0d1117; border: 2px dashed #58a6ff; padding: 20px; text-align: center; cursor: pointer; border-radius: 8px; margin: 10px 0; }
+        .btn-save { width: 100%; background: var(--accent); color: white; padding: 15px; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 16px; }
         
-        /* File Upload Button Design */
-        .file-upload-box { grid-column: span 2; background: #21262d; border: 2px dashed #30363d; padding: 15px; text-align: center; border-radius: 8px; cursor: pointer; }
-        .file-upload-box:hover { border-color: var(--accent); }
-        .file-upload-box input[type="file"] { display: none; }
-        .file-label { cursor: pointer; color: #58a6ff; font-weight: bold; display: block; }
-
-        .btn-save { background: var(--accent); color: white; border: none; padding: 15px; font-weight: bold; cursor: pointer; border-radius: 6px; grid-column: span 2; font-size: 16px; }
-        .btn-save:hover { background: #2ea043; }
-
-        /* Search */
-        .search-area { margin: 25px 0; }
-        .search-bar { width: 100%; padding: 15px; border-radius: 8px; border: 1px solid var(--accent); background: #0d1117; color: white; font-size: 16px; }
-
-        /* Table */
-        .table-scroll { overflow-x: auto; background: var(--card-bg); border-radius: 8px; border: 1px solid #30363d; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th { background: #1f242c; color: #8b949e; padding: 12px; text-align: right; border-bottom: 1px solid #30363d; }
-        td { padding: 12px; border-bottom: 1px solid #21262d; font-size: 14px; }
-        .tag { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
-        .tag-army { background: #f85149; color: #fff; }
-        .tag-civil { background: #1f6feb; color: #fff; }
-        
-        .download-link { color: #58a6ff; text-decoration: none; border: 1px solid #58a6ff; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        table { width: 100%; margin-top: 20px; border-collapse: collapse; background: var(--card); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #30363d; }
+        th { background: #21262d; }
+        .download-btn { color: #58a6ff; text-decoration: none; font-weight: bold; border: 1px solid #58a6ff; padding: 4px 8px; border-radius: 4px; }
         .btn-del { background: #da3633; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <h1>🏛️ منظومة المعلومات الاستخباراتية - ميسان</h1>
-        <small>نظام الأرشفة المركزي للمعطيات المدنية والعسكرية</small>
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-item">إجمالي القيود<span id="stTotal">0</span></div>
-        <div class="stat-item">الموازنة الكلية<span id="stMoney">0</span></div>
-    </div>
-
-    <div class="data-form">
-        <input type="text" id="tName" placeholder="الاسم الكامل للشخص">
-        <select id="tType">
-            <option value="مدني">تصنيف: مدني</option>
-            <option value="عسكري">تصنيف: عسكري</option>
+    <h2 style="text-align:center;">🏛️ منظومة أرشفة ميسان</h2>
+    
+    <div class="form-box">
+        <input type="text" id="pName" placeholder="الاسم الكامل للشخص أو الملف">
+        <select id="pType">
+            <option value="قاعدة بيانات (Access)">قاعدة بيانات (Access)</option>
+            <option value="ملف PDF">ملف PDF</option>
+            <option value="ملف Excel">ملف Excel (XLSX)</option>
+            <option value="معلومات مدنية">معلومات مدنية</option>
+            <option value="معلومات عسكرية">معلومات عسكرية</option>
         </select>
-        <input type="text" id="tArea" placeholder="المنطقة / الحي السكني">
-        <input type="number" id="tSalary" placeholder="الراتب الشهري">
-        <input type="text" id="tDob" placeholder="سنة المواليد (مثال: 1988)">
+        <textarea id="pNotes" placeholder="ملاحظات إضافية..."></textarea>
         
-        <div class="file-upload-box" onclick="document.getElementById('tFile').click()">
-            <span class="file-label" id="fileStatus">📁 اضغط لإرفاق ملف أو وثيقة (صورة/PDF)</span>
-            <input type="file" id="tFile" onchange="updateFileName()">
+        <div class="upload-area" onclick="document.getElementById('pFile').click()">
+            <span id="fileLabel">📁 انقر هنا لإرفاق الملف (Access, PDF, Excel)</span>
+            <input type="file" id="pFile" style="display:none" onchange="updateLabel()">
         </div>
-
-        <textarea id="tNotes" class="full" placeholder="ملاحظات أمنية، معلومات إضافية، سجل التحركات..."></textarea>
-        <button class="btn-save" onclick="saveData()">إدراج وحفظ القيد في المنظومة</button>
+        
+        <button class="btn-save" onclick="saveToSystem()">حفظ البيانات والمرفقات</button>
     </div>
 
-    <div class="search-area">
-        <input type="text" id="mainSearch" class="search-bar" placeholder="🔍 بحث فوري (بالاسم، المنطقة، المواليد، أو الملاحظات)..." onkeyup="filterTable()">
-    </div>
+    <input type="text" id="search" style="border-radius: 20px; padding: 15px;" placeholder="🔍 ابحث بالاسم أو النوع..." onkeyup="doSearch()">
 
-    <div class="table-scroll">
-        <table>
-            <thead>
-                <tr>
-                    <th>الاسم والمعلومات</th>
-                    <th>التصنيف</th>
-                    <th>المنطقة</th>
-                    <th>المواليد</th>
-                    <th>الراتب</th>
-                    <th>المرفق</th>
-                    <th>الإجراء</th>
-                </tr>
-            </thead>
-            <tbody id="dataTableBody">
-                </tbody>
-        </table>
-    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>الاسم والمعلومات</th>
+                <th>النوع</th>
+                <th>المرفق</th>
+                <th>إجراء</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
 </div>
 
 <script>
     let db;
-    const dbReq = indexedDB.open("AmarahIntelDB", 3);
+    // فتح قاعدة البيانات
+    const request = indexedDB.open("MaysanIntelArchive", 1);
 
-    dbReq.onupgradeneeded = (e) => {
+    request.onupgradeneeded = (e) => {
         db = e.target.result;
-        if (!db.objectStoreNames.contains("archive")) {
-            db.createObjectStore("archive", { keyPath: "id", autoIncrement: true });
-        }
+        db.createObjectStore("archive", { keyPath: "id", autoIncrement: true });
     };
 
-    dbReq.onsuccess = (e) => { db = e.target.result; refreshUI(); };
+    request.onsuccess = (e) => {
+        db = e.target.result;
+        refreshTable(); // عرض البيانات فور فتح الصفحة
+    };
 
-    function updateFileName() {
-        const file = document.getElementById('tFile').files[0];
+    function updateLabel() {
+        const file = document.getElementById('pFile').files[0];
         if (file) document.getElementById('fileStatus').innerText = "✅ تم اختيار: " + file.name;
+        // تعديل بسيط للتسمية إذا لم يتغير المعرف
+        document.getElementById('fileLabel').innerText = "✅ تم اختيار: " + file.name;
     }
 
-    function saveData() {
-        const name = document.getElementById("tName").value;
-        if (!name) return alert("سيدي، يجب إدخال الاسم على الأقل.");
+    function saveToSystem() {
+        const name = document.getElementById('pName').value;
+        const fileInput = document.getElementById('pFile');
+        const file = fileInput.files[0];
 
-        const entry = {
-            name: name,
-            type: document.getElementById("tType").value,
-            area: document.getElementById("tArea").value,
-            salary: parseFloat(document.getElementById("tSalary").value) || 0,
-            dob: document.getElementById("tDob").value,
-            notes: document.getElementById("tNotes").value,
-            fileName: null, fileData: null
-        };
+        if (!name) {
+            alert("سيدي، يرجى إدخال الاسم أولاً.");
+            return;
+        }
 
-        const file = document.getElementById("tFile").files[0];
-        const doSave = (data) => {
-            const tx = db.transaction("archive", "readwrite");
-            tx.objectStore("archive").add(data);
-            tx.oncomplete = () => { 
-                alert("تم الأرشفة بنجاح سيدي."); 
-                resetForm(); 
-                refreshUI(); 
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const transaction = db.transaction(["archive"], "readwrite");
+            const store = transaction.objectStore("archive");
+            
+            const entry = {
+                name: name,
+                type: document.getElementById('pType').value,
+                notes: document.getElementById('pNotes').value,
+                fileName: file ? file.name : null,
+                fileData: file ? e.target.result : null
+            };
+
+            const addRequest = store.add(entry);
+            
+            addRequest.onsuccess = () => {
+                alert("تم الحفظ بنجاح سيدي.");
+                clearForm();
+                refreshTable(); // هذه هي الخطوة التي كانت ناقصة (التحديث الفوري)
             };
         };
 
         if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                entry.fileName = file.name;
-                entry.fileData = ev.target.result;
-                doSave(entry);
-            };
             reader.readAsDataURL(file);
         } else {
-            doSave(entry);
+            // حفظ البيانات حتى بدون ملف
+            reader.onload({target: {result: null}});
         }
     }
 
-    function refreshUI() {
-        const tbody = document.getElementById("dataTableBody");
-        tbody.innerHTML = "";
-        let total = 0, money = 0;
+    function refreshTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = ""; // مسح الجدول القديم
 
-        db.transaction("archive").objectStore("archive").openCursor().onsuccess = (e) => {
+        const store = db.transaction("archive").objectStore("archive");
+        store.openCursor().onsuccess = (e) => {
             const cursor = e.target.result;
             if (cursor) {
                 const item = cursor.value;
-                total++; money += item.salary;
-                
                 tbody.innerHTML += `
                     <tr>
                         <td><strong>${item.name}</strong><br><small style="color:#8b949e">${item.notes}</small></td>
-                        <td><span class="tag ${item.type === 'مدني' ? 'tag-civil' : 'tag-army'}">${item.type}</span></td>
-                        <td>${item.area}</td>
-                        <td>${item.dob}</td>
-                        <td>${item.salary.toLocaleString()}</td>
-                        <td>${item.fileData ? `<a href="${item.fileData}" download="${item.fileName}" class="download-link">⬇️ تحميل</a>` : '-'}</td>
-                        <td><button class="btn-del" onclick="deleteRec(${item.id})">حذف</button></td>
+                        <td>${item.type}</td>
+                        <td>${item.fileData ? `<a href="${item.fileData}" download="${item.fileName}" class="download-btn">⬇️ تحميل</a>` : '-'}</td>
+                        <td><button class="btn-del" onclick="deleteItem(${item.id})">حذف</button></td>
                     </tr>`;
                 cursor.continue();
             }
-            document.getElementById("stTotal").innerText = total;
-            document.getElementById("stMoney").innerText = money.toLocaleString();
         };
     }
 
-    function filterTable() {
-        const val = document.getElementById("mainSearch").value.toLowerCase();
-        const rows = document.querySelectorAll("#dataTableBody tr");
-        rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(val) ? "" : "none");
+    function doSearch() {
+        const q = document.getElementById('search').value.toLowerCase();
+        const rows = document.querySelectorAll("#tableBody tr");
+        rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none");
     }
 
-    function deleteRec(id) {
-        if(confirm("هل أنت متأكد من حذف هذا القيد الاستخباراتي سيدي؟")) {
-            db.transaction("archive", "readwrite").objectStore("archive").delete(id).onsuccess = () => refreshUI();
+    function deleteItem(id) {
+        if (confirm("هل تريد الحذف سيدي؟")) {
+            const tx = db.transaction("archive", "readwrite");
+            tx.objectStore("archive").delete(id);
+            tx.oncomplete = () => refreshTable();
         }
     }
 
-    function resetForm() {
-        document.querySelectorAll("input, textarea").forEach(i => i.value = "");
-        document.getElementById('fileStatus').innerText = "📁 اضغط لإرفاق ملف أو وثيقة (صورة/PDF)";
+    function clearForm() {
+        document.getElementById('pName').value = "";
+        document.getElementById('pNotes').value = "";
+        document.getElementById('pFile').value = "";
+        document.getElementById('fileLabel').innerText = "📁 انقر هنا لإرفاق الملف (Access, PDF, Excel)";
     }
 </script>
 
