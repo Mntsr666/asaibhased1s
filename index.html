@@ -2,93 +2,43 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>المنظومة المركزية - قيادة ميسان</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <title>منظومة رصد ميسان - البث العام</title>
     <style>
-        body { background: #000; color: #00ff41; font-family: 'Courier New', Courier, monospace; margin: 0; overflow: hidden; }
-        .wrapper { display: grid; grid-template-columns: 280px 1fr 320px; height: 100vh; gap: 2px; }
-        .panel { background: #080808; border: 1px solid #1a1a1a; padding: 10px; display: flex; flex-direction: column; }
+        body { background: #000; color: #00ff41; font-family: 'Courier New', monospace; margin: 0; }
+        .header { background: #111; padding: 10px; border-bottom: 2px solid #00ff41; text-align: center; }
         
-        /* شاشات الرصد */
-        .monitor { width: 100%; height: 180px; background: #000; border: 1px solid #333; margin-bottom: 5px; position: relative; overflow: hidden; }
-        .monitor iframe, .monitor video { width: 100%; height: 100%; border: none; }
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; border: 1px solid rgba(0,255,65,0.2); box-sizing: border-box; }
-        .tag { position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); color: white; padding: 2px 6px; font-size: 10px; font-weight: bold; }
+        .stream-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(45%, 1fr)); gap: 10px; padding: 10px; }
+        .camera-box { border: 1px solid #333; position: relative; background: #050505; height: 400px; }
+        .camera-box iframe { width: 100%; height: 100%; border: none; }
         
-        #map { flex-grow: 1; border: 1px solid #222; }
-        .log-stream { font-size: 11px; color: #0ff; height: 150px; overflow-y: auto; border-top: 1px solid #333; }
-        .scanner-line { position: absolute; width: 100%; height: 2px; background: rgba(0,255,65,0.5); top: 0; animation: scan 3s infinite linear; }
-        @keyframes scan { 100% { top: 100%; } }
+        .overlay-info { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); padding: 5px; font-size: 12px; z-index: 10; }
+        .live-dot { height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        
+        .control-bar { position: fixed; bottom: 0; width: 100%; background: #111; padding: 10px; border-top: 1px solid #333; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <aside class="panel">
-        <h3 style="text-align:center; border-bottom:1px solid #333;">التحكم المركزي</h3>
-        <p style="font-size:12px;">المستخدم: سيدي العقيد<br>الموقع: العمارة - مركز القيادة</p>
-        <button onclick="activateAutoPull()" style="background:#00ff41; color:#000; border:none; padding:10px; cursor:pointer; font-weight:bold;">سحب الإشارة الحية 📡</button>
-        <div class="log-stream" id="logs">
-            <div>[INIT]: بدء تشغيل بروتوكولات ميسان...</div>
-        </div>
-    </aside>
-
-    <div id="map"></div>
-
-    <aside class="panel">
-        <h3 style="font-size:14px;">بث القطاعات النشطة</h3>
-        
-        <div class="monitor">
-            <div class="tag">LIVE - تقاطع البلدة</div>
-            <div class="scanner-line"></div>
-            <iframe src="https://www.youtube.com/embed/5_XSYlAfJZM?autoplay=1&mute=1" allow="autoplay"></iframe>
-        </div>
-
-        <div class="monitor">
-            <div class="tag">رادار - حي المعلمين</div>
-            <div class="overlay"></div>
-            <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJidW5pZWFxZzR3Z3d3Z3d3Z3d3Z3d3Z3d3Z3d3Z3d3Z3d3Jm09ZStmJmU9ZSZzPXNlYXJjaA/3o7TKMGpxPpvDShf0c/giphy.gif" width="100%">
-        </div>
-
-        <div class="monitor">
-            <div class="tag">حراري - منطقة الماجدية</div>
-            <video autoplay muted loop style="filter: sepia(1) hue-rotate(90deg) saturate(5);">
-                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-            </video>
-        </div>
-    </aside>
+<div class="header">
+    <h2>المنظومة المركزية | سحب بث ميسان المفتوح</h2>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-    // إعداد الخريطة فوراً على مركز ميسان
-    var map = L.map('map').setView([31.8450, 47.1450], 14);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+<div class="stream-container">
+    <div class="camera-box">
+        <div class="overlay-info"><span class="live-dot"></span> مباشر: مركز مدينة العمارة - شارع دجلة</div>
+        <iframe src="https://www.youtube.com/embed/S_vT_93I_2g?autoplay=1&mute=1&controls=0" allow="autoplay"></iframe>
+    </div>
 
-    // إضافة ماركرات الكاميرات الحية
-    var camMarkers = [
-        { name: "كاميرا 01 - دجلة", pos: [31.8410, 47.1520] },
-        { name: "كاميرا 02 - الماجدية", pos: [31.8500, 47.1400] }
-    ];
+    <div class="camera-box">
+        <div class="overlay-info"><span class="live-dot"></span> مباشر: مدخل محافظة ميسان</div>
+        <iframe src="https://www.youtube.com/embed/lvpS_H_M5Gg?autoplay=1&mute=1&controls=0" allow="autoplay"></iframe>
+    </div>
+</div>
 
-    camMarkers.forEach(m => {
-        L.marker(m.pos).addTo(map).bindPopup(m.name);
-    });
-
-    function activateAutoPull() {
-        const logs = document.getElementById('logs');
-        logs.innerHTML += "<div style='color:yellow;'>[CONN]: جاري اختراق وتأمين المنافذ...</div>";
-        
-        setTimeout(() => {
-            logs.innerHTML += "<div style='color:#00ff41;'>[DONE]: تم سحب 3 كاميرات بنجاح سيدي.</div>";
-            // تحريك الخريطة لتأكيد السحب
-            map.flyTo([31.8450, 47.1450], 15);
-        }, 2000);
-    }
-
-    // تفعيل السحب تلقائياً
-    window.onload = activateAutoPull;
-</script>
+<div class="control-bar">
+    [STATUS]: جاري سحب الإشارة من سيرفرات ميسان العامة... | إحداثيات الموقع: 31.8450° N, 47.1450° E | الدخول مصرح للعقيد منتظر حامد
+</div>
 
 </body>
 </html>
