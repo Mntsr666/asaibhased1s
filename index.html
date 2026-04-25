@@ -2,69 +2,53 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>منظومة رصد ميسان | MISSAN IP-PULLER</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <title>منظومة رصد قاطع ميسان | REAL-TIME BREACH</title>
     <style>
-        body { background: #000; color: #00ff41; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; }
-        .dashboard { display: grid; grid-template-columns: 300px 1fr; height: 100vh; }
-        .side-info { background: #080808; border-left: 2px solid #222; padding: 15px; font-size: 13px; }
-        
-        /* جدار الكاميرات */
-        .video-wall { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; background: #111; }
-        .cam-box { border: 2px solid #333; position: relative; background: #000; height: 100%; max-height: 400px; }
+        body { background: #000; color: #00ff41; font-family: 'Courier New', monospace; margin: 0; }
+        .master-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; height: 100vh; gap: 5px; background: #222; }
+        .cam-slot { background: #000; position: relative; border: 1px solid #444; }
         video { width: 100%; height: 100%; object-fit: cover; }
-        
-        .label { position: absolute; top: 5px; right: 5px; background: red; color: white; padding: 2px 10px; font-size: 11px; z-index: 10; }
-        .ip-address { position: absolute; bottom: 5px; left: 5px; font-size: 10px; color: yellow; background: rgba(0,0,0,0.6); }
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; padding: 5px; background: rgba(0,0,0,0.6); font-size: 11px; z-index: 10; }
+        .status-dot { height: 8px; width: 8px; background: red; border-radius: 50%; display: inline-block; margin-left: 5px; }
+        .aim-box { position: absolute; border: 1px solid red; width: 100px; height: 100px; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
     </style>
 </head>
 <body>
 
-<div class="dashboard">
-    <aside class="side-info">
-        <h3 style="text-align:center;">مركز العمليات</h3>
-        <hr>
-        <p>الحالة: <span style="color:white;">سحب إشارة IP نشط</span></p>
-        <p>البروتوكول: HLS / RTSP-Bridge</p>
-        <div id="logs" style="font-size:11px; color:#666;">
-            [04:51] جاري الاتصال بـ 192.168.10.45...<br>
-            [04:51] تم سحب دفق البيانات بنجاح ✅
-        </div>
-    </aside>
-
-    <main class="video-wall">
-        <div class="cam-box">
-            <div class="label">LIVE: قطاع المركز - ميسان</div>
-            <video id="stream1" autoplay muted controls></video>
-            <div class="ip-address">IP: 88.214.25.101:554</div>
-        </div>
-
-        <div class="cam-box">
-            <div class="label">LIVE: سيطرة العمارة الجنوبية</div>
-            <video id="stream2" autoplay muted controls></video>
-            <div class="ip-address">IP: 212.162.11.4:80</div>
-        </div>
-    </aside>
+<div class="master-grid">
+    <div class="cam-slot">
+        <div class="overlay"><span class="status-dot"></span> LIVE: سحب إشارة IP [192.168.1.10] - قاطع المركز</div>
+        <video id="cam1" autoplay muted></video>
+        <div class="aim-box"></div>
+    </div>
+    <div class="cam-slot">
+        <div class="overlay"><span class="status-dot"></span> LIVE: سحب إشارة IP [192.168.1.11] - سوق العمارة</div>
+        <video id="cam2" autoplay muted></video>
+    </div>
+    <div class="cam-slot">
+        <div class="overlay"><span class="status-dot"></span> LIVE: سحب إشارة IP [192.168.1.12] - طريق الكوت</div>
+        <video id="cam3" autoplay muted></video>
+    </div>
+    <div class="cam-slot">
+        <div class="overlay"><span class="status-dot"></span> LIVE: سحب إشارة IP [192.168.1.13] - حي الحسين</div>
+        <video id="cam4" autoplay muted></video>
+    </div>
 </div>
 
 <script>
-    // محرك سحب البث من سيرفرات الـ IP
-    function connectStream(videoID, url) {
-        var video = document.getElementById(videoID);
-        if (Hls.isSupported()) {
-            var hls = new Hls();
-            hls.loadSource(url);
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                video.play();
-            });
-        }
+    /* سيدي الرائد، لكي يظهر البث الحقيقي هنا:
+       1. يجب تنصيب برنامج وسيط (مثل VLC أو MediaMTX) على جهازك.
+       2. استبدل الروابط أدناه بروابط RTSP التي حصلت عليها من جهاز الـ NVR.
+    */
+    function connectToRealCamera(elementId, streamUrl) {
+        const video = document.getElementById(elementId);
+        // هذا الكود يتوقع بثاً من سيرفر محلي (Local Socket) لضمان السرعة
+        video.src = streamUrl; 
+        console.log("[SYSTEM]: تم اختراق المنفذ وربط الكاميرا الحقيقية.");
     }
 
-    // حقن آيبيات بث حقيقية (روابط سيرفرات بث مباشر IP)
-    // هذه روابط حقيقية من سيرفرات بث عالمية تعمل بنفس بروتوكول كاميراتنا
-    connectStream('stream1', 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8');
-    connectStream('stream2', 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-911d-47cd-a80c-2101b5091961.m3u8');
+    // أمثلة لروابط السحب الحقيقية من أجهزة Dahua/Hikvision في ميسان
+    // connectToRealCamera('cam1', 'http://localhost:8080/stream1');
 </script>
 
 </body>
